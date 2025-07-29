@@ -14,7 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      brand_profiles: {
+        Row: {
+          audience_age_groups: string[] | null
+          audience_regions: string[] | null
+          brand_name: string
+          collaboration_interests:
+            | Database["public"]["Enums"]["collaboration_type"][]
+            | null
+          created_at: string
+          cultural_taste_markers: string[] | null
+          id: string
+          industry: string | null
+          mission_statement: string | null
+          niche_interests: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          audience_age_groups?: string[] | null
+          audience_regions?: string[] | null
+          brand_name: string
+          collaboration_interests?:
+            | Database["public"]["Enums"]["collaboration_type"][]
+            | null
+          created_at?: string
+          cultural_taste_markers?: string[] | null
+          id?: string
+          industry?: string | null
+          mission_statement?: string | null
+          niche_interests?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          audience_age_groups?: string[] | null
+          audience_regions?: string[] | null
+          brand_name?: string
+          collaboration_interests?:
+            | Database["public"]["Enums"]["collaboration_type"][]
+            | null
+          created_at?: string
+          cultural_taste_markers?: string[] | null
+          id?: string
+          industry?: string | null
+          mission_statement?: string | null
+          niche_interests?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +100,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      collaboration_type:
+        | "partnerships"
+        | "co_launch"
+        | "cross_promo"
+        | "community"
+        | "sponsorship"
+        | "content_collaboration"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +233,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      collaboration_type: [
+        "partnerships",
+        "co_launch",
+        "cross_promo",
+        "community",
+        "sponsorship",
+        "content_collaboration",
+      ],
+    },
   },
 } as const
