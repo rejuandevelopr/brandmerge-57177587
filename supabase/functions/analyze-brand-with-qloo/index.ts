@@ -88,13 +88,27 @@ serve(async (req) => {
       .eq('id', brandProfileId);
 
     // Create or update analysis record with analyzing status
-    await supabase
+    const { error: initialUpsertError } = await supabase
       .from('brand_qloo_analyses')
       .upsert({
         brand_profile_id: brandProfileId,
         status: 'analyzing',
-        analysis_timestamp: new Date().toISOString()
+        analysis_timestamp: new Date().toISOString(),
+        last_updated: new Date().toISOString()
+      }, {
+        onConflict: 'brand_profile_id'
       });
+
+    if (initialUpsertError) {
+      console.error('Error creating initial analysis record:', initialUpsertError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to initialize analysis' }), 
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
 
     console.log('Preparing Qloo API request for brand:', brandProfile.brand_name);
 
@@ -155,6 +169,8 @@ serve(async (req) => {
         status: 'completed',
         analysis_timestamp: new Date().toISOString(),
         last_updated: new Date().toISOString()
+      }, {
+        onConflict: 'brand_profile_id'
       });
 
     if (upsertError) {
@@ -171,7 +187,10 @@ serve(async (req) => {
         .upsert({
           brand_profile_id: brandProfileId,
           status: 'error',
-          error_message: 'Failed to store analysis results'
+          error_message: 'Failed to store analysis results',
+          last_updated: new Date().toISOString()
+        }, {
+          onConflict: 'brand_profile_id'
         });
 
       return new Response(
