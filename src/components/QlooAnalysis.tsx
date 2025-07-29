@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { AlertTriangle, RefreshCw, CheckCircle, Clock, TrendingUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import BrandSynergyAnalysis from './BrandSynergyAnalysis';
 
 interface SimilarBrand {
   name: string;
@@ -104,6 +105,19 @@ export default function QlooAnalysis({ brandProfileId, brandName, onAnalysisUpda
           clearInterval(pollInterval);
           setIsAnalyzing(false);
           onAnalysisUpdate?.();
+          
+          // Auto-trigger synergy analysis after successful Qloo analysis
+          if (analysisData?.status === 'completed') {
+            setTimeout(async () => {
+              try {
+                await supabase.functions.invoke('analyze-brand-synergy', {
+                  body: { brandProfileId }
+                });
+              } catch (error) {
+                console.error('Failed to auto-trigger synergy analysis:', error);
+              }
+            }, 1000);
+          }
         }
       }, 3000);
 
@@ -248,6 +262,14 @@ export default function QlooAnalysis({ brandProfileId, brandName, onAnalysisUpda
               </p>
             )}
           </div>
+        )}
+
+        {analysisData?.status === 'completed' && (
+          <BrandSynergyAnalysis 
+            brandProfileId={brandProfileId}
+            brandName={brandName}
+            onAnalysisUpdate={onAnalysisUpdate}
+          />
         )}
 
         {!analysisData && (

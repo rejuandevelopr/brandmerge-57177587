@@ -24,8 +24,10 @@ export type Database = {
             | null
           created_at: string
           cultural_taste_markers: string[] | null
+          gpt_synergy_status: string | null
           id: string
           industry: string | null
+          last_gpt_sync: string | null
           last_qloo_sync: string | null
           mission_statement: string | null
           niche_interests: string[] | null
@@ -42,8 +44,10 @@ export type Database = {
             | null
           created_at?: string
           cultural_taste_markers?: string[] | null
+          gpt_synergy_status?: string | null
           id?: string
           industry?: string | null
+          last_gpt_sync?: string | null
           last_qloo_sync?: string | null
           mission_statement?: string | null
           niche_interests?: string[] | null
@@ -60,8 +64,10 @@ export type Database = {
             | null
           created_at?: string
           cultural_taste_markers?: string[] | null
+          gpt_synergy_status?: string | null
           id?: string
           industry?: string | null
+          last_gpt_sync?: string | null
           last_qloo_sync?: string | null
           mission_statement?: string | null
           niche_interests?: string[] | null
@@ -111,6 +117,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      brand_synergy_analyses: {
+        Row: {
+          brand_profile_id: string
+          collab_ideas: Json | null
+          compared_brand_category: string | null
+          compared_brand_name: string
+          created_at: string
+          error_message: string | null
+          gpt_analysis_status: string
+          id: string
+          match_score: number | null
+          pitch_line: string | null
+          qloo_overlap_score: number | null
+          synergy_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          brand_profile_id: string
+          collab_ideas?: Json | null
+          compared_brand_category?: string | null
+          compared_brand_name: string
+          created_at?: string
+          error_message?: string | null
+          gpt_analysis_status?: string
+          id?: string
+          match_score?: number | null
+          pitch_line?: string | null
+          qloo_overlap_score?: number | null
+          synergy_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          brand_profile_id?: string
+          collab_ideas?: Json | null
+          compared_brand_category?: string | null
+          compared_brand_name?: string
+          created_at?: string
+          error_message?: string | null
+          gpt_analysis_status?: string
+          id?: string
+          match_score?: number | null
+          pitch_line?: string | null
+          qloo_overlap_score?: number | null
+          synergy_summary?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {

@@ -2,3 +2,6 @@ project_id = "byzdpzcynaenmustqfds"
 
 [functions.analyze-brand-with-qloo]
 verify_jwt = true
+
+[functions.analyze-brand-synergy]
+verify_jwt = true
