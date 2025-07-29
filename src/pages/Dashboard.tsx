@@ -65,7 +65,10 @@ const Dashboard = () => {
       {/* Header */}
       <header className="border-b border-border bg-background/80 backdrop-blur-lg">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+          <div 
+            className="flex items-center space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => navigate('/')}
+          >
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-primary-foreground font-bold">B</span>
             </div>

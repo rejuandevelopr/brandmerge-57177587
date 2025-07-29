@@ -3,8 +3,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AutoSlider from "@/components/AutoSlider";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const handleGetStarted = () => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      navigate('/auth');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -37,7 +50,11 @@ const Index = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button size="lg" className="text-lg px-8 py-6 bg-primary hover:bg-primary/90 text-primary-foreground hover:scale-105 transition-all duration-300">
+            <Button 
+              size="lg" 
+              className="text-lg px-8 py-6 bg-primary hover:bg-primary/90 text-primary-foreground hover:scale-105 transition-all duration-300"
+              onClick={handleGetStarted}
+            >
               Get Started
             </Button>
             <Button variant="outline" size="lg" className="text-lg px-8 py-6 border-border hover:bg-card text-foreground">

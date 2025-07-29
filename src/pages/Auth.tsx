@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { ArrowLeft } from 'lucide-react';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -63,9 +64,21 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
+      <div className="w-full max-w-md">
+        <Button 
+          variant="ghost" 
+          className="mb-4 hover:bg-transparent text-muted-foreground hover:text-foreground"
+          onClick={() => navigate('/')}
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Home
+        </Button>
+        <Card className="w-full">
         <CardHeader className="text-center">
-          <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center mx-auto mb-4">
+          <div 
+            className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center mx-auto mb-4 cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => navigate('/')}
+          >
             <span className="text-primary-foreground font-bold text-xl">B</span>
           </div>
           <CardTitle className="text-2xl">Welcome to BrandMerge</CardTitle>
@@ -142,6 +155,7 @@ const Auth = () => {
           </Tabs>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 };
