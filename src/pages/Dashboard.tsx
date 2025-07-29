@@ -76,6 +76,9 @@ const Dashboard = () => {
             <span className="text-xl font-bold text-foreground">BrandMerge</span>
           </div>
           <div className="flex items-center space-x-4">
+            <Button variant="ghost" onClick={() => navigate('/discovery')}>
+              Discover Brands
+            </Button>
             <span className="text-muted-foreground">Welcome, {user?.email}</span>
             <Button variant="ghost" onClick={handleSignOut}>
               Sign Out
