@@ -191,17 +191,20 @@ serve(async (req) => {
 
     console.log('Processing Qloo response:', mockQlooResponse);
 
-    // Store results in database
+    // Store results in database using consistent upsert pattern
     console.log('Storing analysis results in database');
     const { error: upsertError } = await supabase
       .from('brand_qloo_analyses')
-      .update({
+      .upsert({
+        brand_profile_id: brandProfileId,
         similar_brands: mockQlooResponse.similarBrands,
         overlap_scores: { overall: mockQlooResponse.overallScore },
         status: 'completed',
+        analysis_timestamp: new Date().toISOString(),
         last_updated: new Date().toISOString()
-      })
-      .eq('brand_profile_id', brandProfileId);
+      }, {
+        onConflict: 'brand_profile_id'
+      });
 
     if (upsertError) {
       console.error('Error storing Qloo results:', upsertError);

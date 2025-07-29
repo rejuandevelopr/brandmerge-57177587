@@ -85,9 +85,10 @@ export default function QlooAnalysis({ brandProfileId, brandName, onAnalysisUpda
 
       if (error) {
         console.error('Error triggering analysis:', error);
+        setIsAnalyzing(false);
         toast({
           title: "Analysis Failed",
-          description: "Failed to start brand analysis. Please try again.",
+          description: `Failed to start brand analysis: ${error.message}`,
           variant: "destructive",
         });
         return;
@@ -98,16 +99,24 @@ export default function QlooAnalysis({ brandProfileId, brandName, onAnalysisUpda
         description: "Your brand analysis is in progress. Results will appear shortly.",
       });
 
-      // Poll for updates
+      // Poll for updates with better state tracking
+      let pollCount = 0;
+      const maxPolls = 40; // 2 minutes max (40 * 3 seconds)
+      
       const pollInterval = setInterval(async () => {
+        pollCount++;
         await fetchAnalysisData();
-        if (analysisData?.status === 'completed' || analysisData?.status === 'error') {
+        
+        // Check current data state
+        const currentData = await getCurrentAnalysisData();
+        
+        if (currentData?.status === 'completed' || currentData?.status === 'error') {
           clearInterval(pollInterval);
           setIsAnalyzing(false);
           onAnalysisUpdate?.();
           
           // Auto-trigger synergy analysis after successful Qloo analysis
-          if (analysisData?.status === 'completed') {
+          if (currentData?.status === 'completed') {
             setTimeout(async () => {
               try {
                 await supabase.functions.invoke('analyze-brand-synergy', {
@@ -118,33 +127,43 @@ export default function QlooAnalysis({ brandProfileId, brandName, onAnalysisUpda
               }
             }, 1000);
           }
+        } else if (pollCount >= maxPolls) {
+          // Timeout after 2 minutes
+          clearInterval(pollInterval);
+          setIsAnalyzing(false);
+          toast({
+            title: "Analysis Timeout",
+            description: "Analysis is taking longer than expected. Please try again.",
+            variant: "destructive",
+          });
         }
       }, 3000);
 
-      // Stop polling after 60 seconds
-      setTimeout(() => {
-        clearInterval(pollInterval);
-        setIsAnalyzing(false);
-      }, 60000);
-
     } catch (error) {
       console.error('Error triggering analysis:', error);
-      
-      // Clear analyzing state on error
       setIsAnalyzing(false);
       
-      // Provide more specific error message
       const errorMessage = error.message || "An unexpected error occurred. Please try again.";
       toast({
         title: "Analysis Failed",
         description: errorMessage,
         variant: "destructive",
       });
+    }
+  };
 
-      // Also update local state to show error
-      setAnalysisData(prev => prev ? { ...prev, status: 'error' } : null);
-    } finally {
-      // Keep analyzing state for visual feedback
+  // Helper function to get fresh analysis data
+  const getCurrentAnalysisData = async () => {
+    try {
+      const { data } = await supabase
+        .from('brand_qloo_analyses')
+        .select('*')
+        .eq('brand_profile_id', brandProfileId)
+        .maybeSingle();
+      return data;
+    } catch (error) {
+      console.error('Error fetching current analysis data:', error);
+      return null;
     }
   };
 
