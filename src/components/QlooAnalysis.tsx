@@ -129,11 +129,20 @@ export default function QlooAnalysis({ brandProfileId, brandName, onAnalysisUpda
 
     } catch (error) {
       console.error('Error triggering analysis:', error);
+      
+      // Clear analyzing state on error
+      setIsAnalyzing(false);
+      
+      // Provide more specific error message
+      const errorMessage = error.message || "An unexpected error occurred. Please try again.";
       toast({
         title: "Analysis Failed",
-        description: "An unexpected error occurred. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
+
+      // Also update local state to show error
+      setAnalysisData(prev => prev ? { ...prev, status: 'error' } : null);
     } finally {
       // Keep analyzing state for visual feedback
     }

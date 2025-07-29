@@ -34,6 +34,12 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const qlooApiKey = Deno.env.get('QLOO_API_KEY');
 
+    console.log('Environment check:', {
+      hasSupabaseUrl: !!supabaseUrl,
+      hasServiceKey: !!supabaseServiceKey,
+      hasQlooKey: !!qlooApiKey
+    });
+
     if (!qlooApiKey) {
       console.error('QLOO_API_KEY not found in environment');
       return new Response(
@@ -81,34 +87,60 @@ serve(async (req) => {
       );
     }
 
-    // Update status to analyzing
-    await supabase
-      .from('brand_profiles')
-      .update({ qloo_analysis_status: 'analyzing' })
-      .eq('id', brandProfileId);
+    console.log('Starting analysis process for brand:', brandProfile.brand_name);
 
-    // Create or update analysis record with analyzing status
-    const { error: initialUpsertError } = await supabase
-      .from('brand_qloo_analyses')
-      .upsert({
-        brand_profile_id: brandProfileId,
-        status: 'analyzing',
-        analysis_timestamp: new Date().toISOString(),
-        last_updated: new Date().toISOString()
-      }, {
-        onConflict: 'brand_profile_id'
-      });
+    // Begin transaction-like operations with better error handling
+    try {
+      // Update status to analyzing
+      console.log('Updating brand profile status to analyzing');
+      const { error: updateError } = await supabase
+        .from('brand_profiles')
+        .update({ qloo_analysis_status: 'analyzing' })
+        .eq('id', brandProfileId);
 
-    if (initialUpsertError) {
-      console.error('Error creating initial analysis record:', initialUpsertError);
+      if (updateError) {
+        console.error('Failed to update brand profile status:', updateError);
+        throw new Error(`Failed to update brand profile status: ${updateError.message}`);
+      }
+
+      // Create or update analysis record with analyzing status
+      console.log('Creating/updating analysis record');
+      const { error: initialUpsertError } = await supabase
+        .from('brand_qloo_analyses')
+        .upsert({
+          brand_profile_id: brandProfileId,
+          status: 'analyzing',
+          analysis_timestamp: new Date().toISOString(),
+          last_updated: new Date().toISOString()
+        }, {
+          onConflict: 'brand_profile_id'
+        });
+
+      if (initialUpsertError) {
+        console.error('Failed to create/update analysis record:', initialUpsertError);
+        // Rollback brand profile status
+        await supabase
+          .from('brand_profiles')
+          .update({ qloo_analysis_status: 'error' })
+          .eq('id', brandProfileId);
+        throw new Error(`Failed to initialize analysis: ${initialUpsertError.message}`);
+      }
+
+      console.log('Successfully initialized analysis state');
+    } catch (error) {
+      console.error('Error during analysis initialization:', error);
       return new Response(
-        JSON.stringify({ error: 'Failed to initialize analysis' }), 
+        JSON.stringify({ 
+          error: 'Failed to initialize analysis',
+          details: error.message 
+        }), 
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
+
 
     console.log('Preparing Qloo API request for brand:', brandProfile.brand_name);
 
@@ -160,41 +192,41 @@ serve(async (req) => {
     console.log('Processing Qloo response:', mockQlooResponse);
 
     // Store results in database
+    console.log('Storing analysis results in database');
     const { error: upsertError } = await supabase
       .from('brand_qloo_analyses')
-      .upsert({
-        brand_profile_id: brandProfileId,
+      .update({
         similar_brands: mockQlooResponse.similarBrands,
         overlap_scores: { overall: mockQlooResponse.overallScore },
         status: 'completed',
-        analysis_timestamp: new Date().toISOString(),
         last_updated: new Date().toISOString()
-      }, {
-        onConflict: 'brand_profile_id'
-      });
+      })
+      .eq('brand_profile_id', brandProfileId);
 
     if (upsertError) {
       console.error('Error storing Qloo results:', upsertError);
       
-      // Update status to error
-      await supabase
-        .from('brand_profiles')
-        .update({ qloo_analysis_status: 'error' })
-        .eq('id', brandProfileId);
-
-      await supabase
-        .from('brand_qloo_analyses')
-        .upsert({
-          brand_profile_id: brandProfileId,
-          status: 'error',
-          error_message: 'Failed to store analysis results',
-          last_updated: new Date().toISOString()
-        }, {
-          onConflict: 'brand_profile_id'
-        });
+      // Update both tables to error state
+      await Promise.all([
+        supabase
+          .from('brand_profiles')
+          .update({ qloo_analysis_status: 'error' })
+          .eq('id', brandProfileId),
+        supabase
+          .from('brand_qloo_analyses')
+          .update({
+            status: 'error',
+            error_message: `Failed to store analysis results: ${upsertError.message}`,
+            last_updated: new Date().toISOString()
+          })
+          .eq('brand_profile_id', brandProfileId)
+      ]);
 
       return new Response(
-        JSON.stringify({ error: 'Failed to store analysis results' }), 
+        JSON.stringify({ 
+          error: 'Failed to store analysis results',
+          details: upsertError.message 
+        }), 
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -203,13 +235,19 @@ serve(async (req) => {
     }
 
     // Update brand profile status
-    await supabase
+    console.log('Updating brand profile to completed status');
+    const { error: finalUpdateError } = await supabase
       .from('brand_profiles')
       .update({ 
         qloo_analysis_status: 'completed',
         last_qloo_sync: new Date().toISOString()
       })
       .eq('id', brandProfileId);
+
+    if (finalUpdateError) {
+      console.error('Warning: Failed to update final brand profile status:', finalUpdateError);
+      // Continue anyway since analysis data was stored successfully
+    }
 
     console.log('Qloo analysis completed successfully for brand:', brandProfile.brand_name);
 
