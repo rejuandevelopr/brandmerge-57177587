@@ -26,8 +26,10 @@ export type Database = {
           cultural_taste_markers: string[] | null
           id: string
           industry: string | null
+          last_qloo_sync: string | null
           mission_statement: string | null
           niche_interests: string[] | null
+          qloo_analysis_status: string | null
           updated_at: string
           user_id: string
         }
@@ -42,8 +44,10 @@ export type Database = {
           cultural_taste_markers?: string[] | null
           id?: string
           industry?: string | null
+          last_qloo_sync?: string | null
           mission_statement?: string | null
           niche_interests?: string[] | null
+          qloo_analysis_status?: string | null
           updated_at?: string
           user_id: string
         }
@@ -58,12 +62,55 @@ export type Database = {
           cultural_taste_markers?: string[] | null
           id?: string
           industry?: string | null
+          last_qloo_sync?: string | null
           mission_statement?: string | null
           niche_interests?: string[] | null
+          qloo_analysis_status?: string | null
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      brand_qloo_analyses: {
+        Row: {
+          analysis_timestamp: string
+          brand_profile_id: string
+          error_message: string | null
+          id: string
+          last_updated: string
+          overlap_scores: Json | null
+          similar_brands: Json | null
+          status: string
+        }
+        Insert: {
+          analysis_timestamp?: string
+          brand_profile_id: string
+          error_message?: string | null
+          id?: string
+          last_updated?: string
+          overlap_scores?: Json | null
+          similar_brands?: Json | null
+          status?: string
+        }
+        Update: {
+          analysis_timestamp?: string
+          brand_profile_id?: string
+          error_message?: string | null
+          id?: string
+          last_updated?: string
+          overlap_scores?: Json | null
+          similar_brands?: Json | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_qloo_analyses_brand_profile_id_fkey"
+            columns: ["brand_profile_id"]
+            isOneToOne: true
+            referencedRelation: "brand_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

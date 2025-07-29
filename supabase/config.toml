@@ -1,1 +1,4 @@
 project_id = "byzdpzcynaenmustqfds"
+
+[functions.analyze-brand-with-qloo]
+verify_jwt = true
