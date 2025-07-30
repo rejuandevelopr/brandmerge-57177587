@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      brand_connections: {
+        Row: {
+          created_at: string
+          id: string
+          intro_message: string | null
+          requested_brand_id: string
+          requester_brand_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          intro_message?: string | null
+          requested_brand_id: string
+          requester_brand_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          intro_message?: string | null
+          requested_brand_id?: string
+          requester_brand_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_connections_requested_brand_id_fkey"
+            columns: ["requested_brand_id"]
+            isOneToOne: false
+            referencedRelation: "brand_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brand_connections_requester_brand_id_fkey"
+            columns: ["requester_brand_id"]
+            isOneToOne: false
+            referencedRelation: "brand_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       brand_profiles: {
         Row: {
           audience_age_groups: string[] | null
@@ -165,6 +210,143 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      collaboration_campaigns: {
+        Row: {
+          campaign_data: Json | null
+          collaboration_type: string | null
+          connection_id: string
+          created_at: string
+          creator_brand_id: string
+          description: string | null
+          id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          campaign_data?: Json | null
+          collaboration_type?: string | null
+          connection_id: string
+          created_at?: string
+          creator_brand_id: string
+          description?: string | null
+          id?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          campaign_data?: Json | null
+          collaboration_type?: string | null
+          connection_id?: string
+          created_at?: string
+          creator_brand_id?: string
+          description?: string | null
+          id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collaboration_campaigns_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "brand_connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collaboration_campaigns_creator_brand_id_fkey"
+            columns: ["creator_brand_id"]
+            isOneToOne: false
+            referencedRelation: "brand_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          connection_id: string
+          created_at: string
+          id: string
+          last_message_at: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          connection_id: string
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          connection_id?: string
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "brand_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          message_type: string
+          metadata: Json | null
+          read_at: string | null
+          sender_brand_id: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          message_type?: string
+          metadata?: Json | null
+          read_at?: string | null
+          sender_brand_id: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          message_type?: string
+          metadata?: Json | null
+          read_at?: string | null
+          sender_brand_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_brand_id_fkey"
+            columns: ["sender_brand_id"]
+            isOneToOne: false
+            referencedRelation: "brand_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
