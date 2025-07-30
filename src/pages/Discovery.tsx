@@ -31,6 +31,7 @@ const Discovery = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [currentBrandId, setCurrentBrandId] = useState<string | null>(null);
   const [filters, setFilters] = useState({
     industry: '',
     location: '',
@@ -53,6 +54,17 @@ const Discovery = () => {
 
   const fetchDiscoveryBrands = async () => {
     if (!user) return;
+
+    // First get current user's first brand for connection requests
+    const { data: userBrands } = await supabase
+      .from('brand_profiles')
+      .select('id')
+      .eq('user_id', user.id)
+      .limit(1);
+
+    if (userBrands && userBrands.length > 0) {
+      setCurrentBrandId(userBrands[0].id);
+    }
 
     // Fetch brands from other users (excluding current user's brands)
     const { data: otherBrands, error } = await supabase
@@ -296,11 +308,8 @@ const Discovery = () => {
               <BrandMatchCard
                 key={brand.id}
                 brand={brand}
+                currentBrandId={currentBrandId || undefined}
                 onViewProfile={() => handleViewProfile(brand.id)}
-                onConnect={() => {
-                  // TODO: Implement connect functionality
-                  console.log('Connect with:', brand.brand_name);
-                }}
               />
             ))}
           </div>

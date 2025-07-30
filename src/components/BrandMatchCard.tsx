@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Eye, MessageCircle, MapPin, Users, Target } from 'lucide-react';
+import { useState } from 'react';
+import ConnectionRequestModal from './ConnectionRequestModal';
 
 interface BrandMatchCardProps {
   brand: {
@@ -16,11 +18,13 @@ interface BrandMatchCardProps {
     match_score?: number;
     overlap_percentage?: number;
   };
+  currentBrandId?: string;
   onViewProfile: () => void;
-  onConnect: () => void;
+  onConnect?: () => void;
 }
 
-const BrandMatchCard = ({ brand, onViewProfile, onConnect }: BrandMatchCardProps) => {
+const BrandMatchCard = ({ brand, currentBrandId, onViewProfile, onConnect }: BrandMatchCardProps) => {
+  const [isConnectionModalOpen, setIsConnectionModalOpen] = useState(false);
   const getMatchScoreColor = (score: number) => {
     if (score >= 85) return 'text-green-600';
     if (score >= 70) return 'text-yellow-600';
@@ -126,13 +130,29 @@ const BrandMatchCard = ({ brand, onViewProfile, onConnect }: BrandMatchCardProps
           </Button>
           <Button 
             size="sm" 
-            onClick={onConnect}
+            onClick={() => {
+              if (currentBrandId) {
+                setIsConnectionModalOpen(true);
+              } else if (onConnect) {
+                onConnect();
+              }
+            }}
             className="flex-1 flex items-center space-x-1"
           >
             <MessageCircle className="w-3 h-3" />
             <span>Connect</span>
           </Button>
         </div>
+        
+        {/* Connection Request Modal */}
+        {currentBrandId && (
+          <ConnectionRequestModal
+            isOpen={isConnectionModalOpen}
+            onClose={() => setIsConnectionModalOpen(false)}
+            targetBrand={brand}
+            currentBrandId={currentBrandId}
+          />
+        )}
       </CardContent>
     </Card>
   );

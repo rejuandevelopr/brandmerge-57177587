@@ -10,6 +10,8 @@ import Dashboard from "./pages/Dashboard";
 import BrandBuilder from "./pages/BrandBuilder";
 import Discovery from "./pages/Discovery";
 import BrandProfile from "./pages/BrandProfile";
+import Connections from "./pages/Connections";
+import Chat from "./pages/Chat";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +29,8 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/brand-builder" element={<BrandBuilder />} />
             <Route path="/discovery" element={<Discovery />} />
+            <Route path="/connections" element={<Connections />} />
+            <Route path="/chat/:connectionId" element={<Chat />} />
             <Route path="/brand-profile/:id" element={<BrandProfile />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

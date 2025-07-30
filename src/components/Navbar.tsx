@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
@@ -33,18 +33,37 @@ const Navbar = () => {
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
-              Features
-            </a>
-            <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
-              How to use
-            </a>
-            <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
-              Pricing
-            </a>
-            <a href="#faq" className="text-muted-foreground hover:text-foreground transition-colors">
-              FAQs
-            </a>
+            {user ? (
+              <>
+                <Link 
+                  to="/discovery" 
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Discover Brands
+                </Link>
+                <Link 
+                  to="/connections" 
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Connections
+                </Link>
+              </>
+            ) : (
+              <>
+                <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Features
+                </a>
+                <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors">
+                  How to use
+                </a>
+                <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Pricing
+                </a>
+                <a href="#faq" className="text-muted-foreground hover:text-foreground transition-colors">
+                  FAQs
+                </a>
+              </>
+            )}
           </div>
 
           {/* Auth Buttons */}
