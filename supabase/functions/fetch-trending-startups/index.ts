@@ -28,14 +28,26 @@ serve(async (req) => {
       throw new Error('Missing required API keys: GOOGLE_SEARCH_API_KEY, GOOGLE_SEARCH_ENGINE_ID, or OPENAI_API_KEY');
     }
 
-    const { industry = 'technology', limit = 10 } = await req.json();
+    const { industry = 'technology', limit = 10, country = '', city = '' } = await req.json();
 
-    // Define search queries for trending startups
+    // Build location-specific search terms
+    const locationTerms = [];
+    if (city) locationTerms.push(city);
+    if (country) locationTerms.push(country);
+    const locationQuery = locationTerms.join(' ');
+
+    // Define search queries for trending startups with location awareness
     const searchQueries = [
-      `"fastest growing startups 2025" ${industry}`,
-      `"new ${industry} brands seeking partnerships"`,
-      `"${industry} startups Series A funding 2025"`,
-      `"trending ${industry} companies collaboration opportunities"`
+      `"fastest growing startups 2025" ${industry} ${locationQuery}`,
+      `"new ${industry} brands seeking partnerships" ${locationQuery}`,
+      `"${industry} startups Series A funding 2025" ${locationQuery}`,
+      `"trending ${industry} companies collaboration opportunities" ${locationQuery}`,
+      // Additional location-specific queries
+      ...(locationQuery ? [
+        `"startups in ${city || country}" ${industry}`,
+        `"${industry} brands ${city || country} seeking partnerships"`,
+        `"local ${industry} collaboration opportunities ${country}"`
+      ] : [])
     ];
 
     const allStartups = [];
@@ -67,7 +79,10 @@ serve(async (req) => {
               "growth_indicators": ["list of growth signals mentioned"],
               "partnership_signals": ["indicators they're open to partnerships"],
               "cultural_markers": ["lifestyle/culture indicators"],
-              "funding_status": "funding stage mentioned or unknown"
+              "funding_status": "funding stage mentioned or unknown",
+              "country": "country where company is based",
+              "city": "city where company is based",
+              "headquarters_location": "full location if mentioned"
             }
 
             Only return the JSON object. If this doesn't appear to be about a startup, return null.
@@ -131,6 +146,9 @@ serve(async (req) => {
       funding_status: startup.funding_status,
       source_url: startup.source_url,
       opportunity_score: startup.opportunity_score,
+      country: startup.country || country || null,
+      city: startup.city || city || null,
+      headquarters_location: startup.headquarters_location || (city && country ? `${city}, ${country}` : country || null)
     }));
 
     if (startupInserts.length > 0) {

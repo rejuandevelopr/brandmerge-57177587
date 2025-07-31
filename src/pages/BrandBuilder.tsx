@@ -30,6 +30,14 @@ const AGE_GROUPS = [
   'Gen Z (18-26)', 'Millennials (27-42)', 'Gen X (43-58)', 'Baby Boomers (59-77)'
 ];
 
+const COUNTRIES = [
+  'United States', 'Canada', 'United Kingdom', 'Germany', 'France', 'Spain', 'Italy', 
+  'Netherlands', 'Sweden', 'Norway', 'Denmark', 'Finland', 'Switzerland', 'Austria',
+  'Australia', 'New Zealand', 'Japan', 'South Korea', 'Singapore', 'Hong Kong',
+  'Brazil', 'Mexico', 'Argentina', 'India', 'China', 'United Arab Emirates',
+  'Israel', 'South Africa', 'Nigeria', 'Kenya', 'Other'
+];
+
 const BrandBuilder = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -43,7 +51,11 @@ const BrandBuilder = () => {
     audienceAgeGroups: [] as string[],
     audienceRegions: [] as string[],
     nicheInterests: [] as string[],
-    collaborationInterests: [] as string[]
+    collaborationInterests: [] as string[],
+    country: '',
+    cityRegion: '',
+    physicalAddress: '',
+    websiteUrl: ''
   });
   
   const [newTag, setNewTag] = useState('');
@@ -102,7 +114,11 @@ const BrandBuilder = () => {
         audience_age_groups: formData.audienceAgeGroups,
         audience_regions: formData.audienceRegions,
         niche_interests: formData.nicheInterests,
-        collaboration_interests: formData.collaborationInterests as any
+        collaboration_interests: formData.collaborationInterests as any,
+        country: formData.country,
+        city_region: formData.cityRegion,
+        physical_address: formData.physicalAddress || null,
+        website_url: formData.websiteUrl || null
       });
 
     if (error) {
@@ -340,6 +356,64 @@ const BrandBuilder = () => {
             </CardContent>
           </Card>
 
+          {/* Location Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Location Details</CardTitle>
+              <CardDescription>Help us find local collaboration opportunities</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="country">Country *</Label>
+                <select
+                  id="country"
+                  value={formData.country}
+                  onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value }))}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  required
+                >
+                  <option value="">Select a country</option>
+                  {COUNTRIES.map((country) => (
+                    <option key={country} value={country}>
+                      {country}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cityRegion">City/Region *</Label>
+                <Input
+                  id="cityRegion"
+                  type="text"
+                  value={formData.cityRegion}
+                  onChange={(e) => setFormData(prev => ({ ...prev, cityRegion: e.target.value }))}
+                  placeholder="e.g., San Francisco, London, Tokyo"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="physicalAddress">Physical Address (Optional)</Label>
+                <Textarea
+                  id="physicalAddress"
+                  value={formData.physicalAddress}
+                  onChange={(e) => setFormData(prev => ({ ...prev, physicalAddress: e.target.value }))}
+                  placeholder="Full address for deeper local search (optional)"
+                  rows={2}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="websiteUrl">Website/Online Presence (Optional)</Label>
+                <Input
+                  id="websiteUrl"
+                  type="url"
+                  value={formData.websiteUrl}
+                  onChange={(e) => setFormData(prev => ({ ...prev, websiteUrl: e.target.value }))}
+                  placeholder="https://your-website.com"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Collaboration Interests */}
           <Card>
             <CardHeader>
@@ -366,7 +440,7 @@ const BrandBuilder = () => {
             <Button type="button" variant="outline" onClick={() => navigate('/dashboard')}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || !formData.brandName}>
+            <Button type="submit" disabled={loading || !formData.brandName || !formData.country || !formData.cityRegion}>
               {loading ? "Creating..." : "Create Brand Profile"}
             </Button>
           </div>

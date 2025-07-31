@@ -64,9 +64,11 @@ export type Database = {
           audience_age_groups: string[] | null
           audience_regions: string[] | null
           brand_name: string
+          city_region: string | null
           collaboration_interests:
             | Database["public"]["Enums"]["collaboration_type"][]
             | null
+          country: string | null
           created_at: string
           cultural_taste_markers: string[] | null
           gpt_synergy_status: string | null
@@ -76,17 +78,21 @@ export type Database = {
           last_qloo_sync: string | null
           mission_statement: string | null
           niche_interests: string[] | null
+          physical_address: string | null
           qloo_analysis_status: string | null
           updated_at: string
           user_id: string
+          website_url: string | null
         }
         Insert: {
           audience_age_groups?: string[] | null
           audience_regions?: string[] | null
           brand_name: string
+          city_region?: string | null
           collaboration_interests?:
             | Database["public"]["Enums"]["collaboration_type"][]
             | null
+          country?: string | null
           created_at?: string
           cultural_taste_markers?: string[] | null
           gpt_synergy_status?: string | null
@@ -96,17 +102,21 @@ export type Database = {
           last_qloo_sync?: string | null
           mission_statement?: string | null
           niche_interests?: string[] | null
+          physical_address?: string | null
           qloo_analysis_status?: string | null
           updated_at?: string
           user_id: string
+          website_url?: string | null
         }
         Update: {
           audience_age_groups?: string[] | null
           audience_regions?: string[] | null
           brand_name?: string
+          city_region?: string | null
           collaboration_interests?:
             | Database["public"]["Enums"]["collaboration_type"][]
             | null
+          country?: string | null
           created_at?: string
           cultural_taste_markers?: string[] | null
           gpt_synergy_status?: string | null
@@ -116,9 +126,11 @@ export type Database = {
           last_qloo_sync?: string | null
           mission_statement?: string | null
           niche_interests?: string[] | null
+          physical_address?: string | null
           qloo_analysis_status?: string | null
           updated_at?: string
           user_id?: string
+          website_url?: string | null
         }
         Relationships: []
       }
@@ -455,12 +467,15 @@ export type Database = {
       }
       trending_startups: {
         Row: {
+          city: string | null
           company_name: string
+          country: string | null
           cultural_markers: string[] | null
           description: string | null
           discovered_at: string
           funding_status: string | null
           growth_indicators: Json | null
+          headquarters_location: string | null
           id: string
           industry: string | null
           is_active: boolean | null
@@ -471,12 +486,15 @@ export type Database = {
           source_url: string | null
         }
         Insert: {
+          city?: string | null
           company_name: string
+          country?: string | null
           cultural_markers?: string[] | null
           description?: string | null
           discovered_at?: string
           funding_status?: string | null
           growth_indicators?: Json | null
+          headquarters_location?: string | null
           id?: string
           industry?: string | null
           is_active?: boolean | null
@@ -487,12 +505,15 @@ export type Database = {
           source_url?: string | null
         }
         Update: {
+          city?: string | null
           company_name?: string
+          country?: string | null
           cultural_markers?: string[] | null
           description?: string | null
           discovered_at?: string
           funding_status?: string | null
           growth_indicators?: Json | null
+          headquarters_location?: string | null
           id?: string
           industry?: string | null
           is_active?: boolean | null

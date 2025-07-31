@@ -37,6 +37,8 @@ interface TrendingOpportunitiesProps {
   brandProfileId: string;
   brandName: string;
   brandIndustry?: string;
+  brandCountry?: string;
+  brandCity?: string;
 }
 
 export default function TrendingOpportunities({ brandProfileId, brandName, brandIndustry }: TrendingOpportunitiesProps) {

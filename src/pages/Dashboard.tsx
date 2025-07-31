@@ -14,6 +14,10 @@ interface BrandProfile {
   industry: string;
   mission_statement: string;
   created_at: string;
+  country?: string;
+  city_region?: string;
+  physical_address?: string;
+  website_url?: string;
 }
 
 const Dashboard = () => {
@@ -36,7 +40,7 @@ const Dashboard = () => {
     
     const { data, error } = await supabase
       .from('brand_profiles')
-      .select('id, brand_name, industry, mission_statement, created_at')
+      .select('id, brand_name, industry, mission_statement, created_at, country, city_region, physical_address, website_url')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
@@ -146,11 +150,13 @@ const Dashboard = () => {
                   onAnalysisUpdate={fetchBrandProfiles}
                 />
                 
-                <TrendingOpportunities
-                  brandProfileId={profile.id}
-                  brandName={profile.brand_name}
-                  brandIndustry={profile.industry}
-                />
+                  <TrendingOpportunities 
+                    brandProfileId={profile.id}
+                    brandName={profile.brand_name}
+                    brandIndustry={profile.industry}
+                    brandCountry={profile.country}
+                    brandCity={profile.city_region}
+                  />
               </div>
             ))}
           </div>
