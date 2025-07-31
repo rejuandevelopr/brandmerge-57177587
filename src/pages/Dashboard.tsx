@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus } from 'lucide-react';
 import QlooAnalysis from '@/components/QlooAnalysis';
+import TrendingOpportunities from '@/components/TrendingOpportunities';
 
 interface BrandProfile {
   id: string;
@@ -143,6 +144,12 @@ const Dashboard = () => {
                   brandProfileId={profile.id}
                   brandName={profile.brand_name}
                   onAnalysisUpdate={fetchBrandProfiles}
+                />
+                
+                <TrendingOpportunities
+                  brandProfileId={profile.id}
+                  brandName={profile.brand_name}
+                  brandIndustry={profile.industry}
                 />
               </div>
             ))}

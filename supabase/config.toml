@@ -1,7 +1,19 @@
 project_id = "byzdpzcynaenmustqfds"
 
+[functions.fetch-trending-startups]
+verify_jwt = false
+
+[functions.fetch-partnership-news] 
+verify_jwt = false
+
+[functions.generate-market-intelligence]
+verify_jwt = false
+
 [functions.analyze-brand-with-qloo]
 verify_jwt = true
 
 [functions.analyze-brand-synergy]
+verify_jwt = true
+
+[functions.generate-intro-message]
 verify_jwt = true
