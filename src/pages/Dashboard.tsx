@@ -66,20 +66,22 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="h-16 border-b border-border bg-background/80 backdrop-blur-lg flex items-center justify-between px-6">
-        <div>
-          <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">Welcome back, {user?.email}</p>
-        </div>
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" onClick={handleSignOut}>
-            Sign Out
-          </Button>
+      <header className="h-16 border-b border-border bg-background/80 backdrop-blur-lg">
+        <div className="container mx-auto px-4 flex items-center justify-between h-full">
+          <div>
+            <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
+            <p className="text-sm text-muted-foreground">Welcome back, {user?.email}</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" onClick={handleSignOut}>
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="p-6">
+      <main className="container mx-auto px-4 py-8 space-y-6">
         <BrandTable 
           brandProfiles={brandProfiles} 
           loading={loading}
