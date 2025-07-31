@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Search, TrendingUp, Users, MapPin, ExternalLink } from "lucide-react";
+import { ArrowLeft, Search, TrendingUp, Users, MapPin, ExternalLink, Clock, BarChart3, Map } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -64,6 +64,10 @@ export default function BrandAnalysis() {
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
+  const [trendData, setTrendData] = useState<any>(null);
+  const [locationInsights, setLocationInsights] = useState<any[]>([]);
+  const [viewMode, setViewMode] = useState<'current' | 'historical'>('current');
+  const [sortBy, setSortBy] = useState<'relevance' | 'location' | 'trend'>('relevance');
 
   const handleSynergyTrigger = async () => {
     try {
@@ -135,6 +139,15 @@ export default function BrandAnalysis() {
         if (session.session_status === 'analyzing') {
           pollAnalysisProgress();
         }
+      }
+
+      // Fetch trend data and location insights if we have match analysis
+      if (analysis && analysis.matched_brands) {
+        await fetchTrendData(analysis);
+        const brands = Array.isArray(analysis.matched_brands) 
+          ? (analysis.matched_brands as unknown as MatchedBrand[])
+          : [];
+        await fetchLocationInsights(brands);
       }
 
     } catch (error) {
@@ -222,6 +235,73 @@ export default function BrandAnalysis() {
     }, 2000);
 
     return interval;
+  };
+
+  const fetchTrendData = async (analysis: any) => {
+    if (!id || !analysis) return;
+
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-brand-trends', {
+        body: { 
+          brandProfileId: id, 
+          currentAnalysis: analysis 
+        }
+      });
+
+      if (!error && data) {
+        setTrendData(data);
+      }
+    } catch (error) {
+      console.error('Error fetching trend data:', error);
+    }
+  };
+
+  const fetchLocationInsights = async (matchedBrands: any[]) => {
+    if (!id || !matchedBrands?.length) return;
+
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-geo-context', {
+        body: { 
+          brandProfileId: id, 
+          matchedBrands: matchedBrands 
+        }
+      });
+
+      if (!error && data) {
+        setLocationInsights(data.location_insights || []);
+      }
+    } catch (error) {
+      console.error('Error fetching location insights:', error);
+    }
+  };
+
+  const getTrendIndicator = (brandName: string) => {
+    const trend = trendData?.trends?.find((t: any) => t.brand_name === brandName);
+    if (!trend) return null;
+
+    switch (trend.trend_direction) {
+      case 'rising':
+        return <span className="text-green-600 text-sm" title={`+${trend.trend_percentage}%`}>↗️</span>;
+      case 'falling':
+        return <span className="text-red-600 text-sm" title={`${trend.trend_percentage}%`}>↘️</span>;
+      case 'new':
+        return <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">New</Badge>;
+      default:
+        return <span className="text-gray-600 text-sm" title="Stable">➡️</span>;
+    }
+  };
+
+  const getLocationBadge = (brandName: string) => {
+    const insight = locationInsights?.find((li: any) => li.matched_brand_name === brandName);
+    if (!insight) return null;
+
+    if (insight.same_city) {
+      return <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">🏠 Same City</Badge>;
+    }
+    if (insight.same_country) {
+      return <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200">🌎 Same Country</Badge>;
+    }
+    return null;
   };
 
   const getMatchTypeColor = (matchType: string) => {
@@ -394,12 +474,48 @@ export default function BrandAnalysis() {
       {matchAnalysis && matchAnalysis.matched_brands && matchAnalysis.matched_brands.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Users className="h-5 w-5" />
-              <span>Top 10-15 Aligned Brands ({matchAnalysis.match_count})</span>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Users className="h-5 w-5" />
+                <span>AI-Discovered Aligned Brands ({matchAnalysis.match_count})</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setViewMode(viewMode === 'current' ? 'historical' : 'current')}
+                  className="flex items-center space-x-1"
+                >
+                  <Clock className="h-4 w-4" />
+                  <span>{viewMode === 'current' ? 'Current' : 'Historical'}</span>
+                </Button>
+                <div className="flex items-center space-x-1 border rounded-lg p-1">
+                  <Button
+                    variant={sortBy === 'relevance' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setSortBy('relevance')}
+                  >
+                    <BarChart3 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={sortBy === 'location' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setSortBy('location')}
+                  >
+                    <Map className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={sortBy === 'trend' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setSortBy('trend')}
+                  >
+                    <TrendingUp className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             </CardTitle>
             <CardDescription>
-              AI-discovered brands with cultural and audience alignment potential
+              AI-powered cultural alignment with time-based trends and location prioritization
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -420,7 +536,11 @@ export default function BrandAnalysis() {
                   <TableRow key={index}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{brand.name}</div>
+                        <div className="font-medium flex items-center gap-2">
+                          {brand.name}
+                          {getTrendIndicator(brand.name)}
+                          {getLocationBadge(brand.name)}
+                        </div>
                         <div className="text-sm text-muted-foreground">
                           {brand.description}
                         </div>
