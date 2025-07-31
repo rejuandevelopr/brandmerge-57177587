@@ -219,7 +219,7 @@ REQUIRED OUTPUT: Return a valid JSON array with exactly this structure:
     "culturalTasteMarkers": ["marker1", "marker2", "marker3"],
     "collaborationInterests": ["partnership type1", "partnership type2"],
     "website": "https://website.com (if found)",
-    "description": "Brief description emphasizing why they're a good match AND their local presence",
+    "description": "Brief description under 100 chars emphasizing match and location",
     "matchScore": 85,
     "sourceUrl": "Source where you found this info",
     "culturalAlignScore": 85,
@@ -257,12 +257,12 @@ Focus on brands that ${brandProfile.brand_name} could realistically partner with
         messages: [
           { 
             role: 'system', 
-            content: 'You are a brand partnership expert with access to current web search. Always search for real brands and return valid JSON arrays only. Make sure all brands you suggest actually exist and are active businesses.' 
+            content: 'You are a brand partnership expert. Return ONLY valid JSON arrays. Keep brand descriptions under 100 characters. Focus on real, existing brands.' 
           },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.3,
-        max_tokens: 3000,
+        temperature: 0.2,
+        max_tokens: 4000,
       }),
     });
 
@@ -273,10 +273,46 @@ Focus on brands that ${brandProfile.brand_name} could realistically partner with
       try {
         // Clean the response to ensure it's valid JSON
         const cleanContent = content.trim();
-        const jsonMatch = cleanContent.match(/\[[\s\S]*\]/);
-        const jsonString = jsonMatch ? jsonMatch[0] : cleanContent;
         
-        const discoveredBrands = JSON.parse(jsonString);
+        // Try to extract JSON array from response
+        let jsonString = cleanContent;
+        const jsonMatch = cleanContent.match(/\[[\s\S]*?\]/);
+        if (jsonMatch) {
+          jsonString = jsonMatch[0];
+        }
+        
+        // Fallback parsing for partial JSON
+        let discoveredBrands;
+        try {
+          discoveredBrands = JSON.parse(jsonString);
+        } catch (initialParseError) {
+          console.log('Initial parse failed, trying fallback parsing...');
+          
+          // Try to fix incomplete JSON by adding closing brackets
+          let fixedJson = jsonString;
+          if (!fixedJson.endsWith(']')) {
+            // Count open brackets vs close brackets
+            const openBrackets = (fixedJson.match(/\[/g) || []).length;
+            const closeBrackets = (fixedJson.match(/\]/g) || []).length;
+            const openBraces = (fixedJson.match(/\{/g) || []).length;
+            const closeBraces = (fixedJson.match(/\}/g) || []).length;
+            
+            // Close incomplete objects and arrays
+            for (let i = 0; i < openBraces - closeBraces; i++) {
+              fixedJson += '}';
+            }
+            for (let i = 0; i < openBrackets - closeBrackets; i++) {
+              fixedJson += ']';
+            }
+          }
+          
+          try {
+            discoveredBrands = JSON.parse(fixedJson);
+          } catch (fallbackError) {
+            console.error('Fallback parsing also failed:', fallbackError);
+            return [];
+          }
+        }
         console.log(`ChatGPT discovered ${discoveredBrands.length} aligned brands`);
         
         // Validate and filter the results
