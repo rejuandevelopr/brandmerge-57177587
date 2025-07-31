@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/ui/brand-logo";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -27,7 +28,7 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate('/')}>
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold">B</span>
+              <BrandLogo className="text-primary-foreground" size={20} />
             </div>
             <span className="text-xl font-bold text-foreground">BrandMerge</span>
           </div>

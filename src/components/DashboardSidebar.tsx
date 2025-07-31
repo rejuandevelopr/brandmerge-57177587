@@ -22,6 +22,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { BrandLogo } from '@/components/ui/brand-logo';
 
 const navigationItems = [
   { title: 'Dashboard', url: '/dashboard', icon: BarChart3 },
@@ -61,7 +62,7 @@ export function DashboardSidebar() {
           onClick={() => navigate('/')}
         >
           <div className="w-8 h-8 bg-sidebar-primary rounded-lg flex items-center justify-center">
-            <span className="text-sidebar-primary-foreground font-bold">B</span>
+            <BrandLogo className="text-sidebar-primary-foreground" size={20} />
           </div>
           {!isCollapsed && (
             <span className="text-lg font-bold text-sidebar-foreground">BrandMerge</span>

@@ -11,6 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { BrandLogo } from '@/components/ui/brand-logo';
 import { X, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 
 const INDUSTRIES = [
@@ -200,7 +201,7 @@ const BrandBuilder = () => {
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold">B</span>
+              <BrandLogo className="text-primary-foreground" size={20} />
             </div>
             <span className="text-xl font-bold text-foreground">BrandMerge</span>
           </div>

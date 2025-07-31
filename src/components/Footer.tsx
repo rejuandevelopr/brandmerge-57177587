@@ -1,3 +1,5 @@
+import { BrandLogo } from "@/components/ui/brand-logo";
+
 const Footer = () => {
   return (
     <footer className="bg-card border-t border-border">
@@ -7,7 +9,7 @@ const Footer = () => {
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold">B</span>
+                <BrandLogo className="text-primary-foreground" size={20} />
               </div>
               <span className="text-xl font-bold text-foreground">BrandMerge</span>
             </div>
