@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Search, TrendingUp, Users, MapPin, ExternalLink, Clock, BarChart3, Map } from "lucide-react";
+import { ArrowLeft, Search, TrendingUp, Users, MapPin, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,10 +11,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import QlooAnalysis from "@/components/QlooAnalysis";
 import BrandSynergyAnalysis from "@/components/BrandSynergyAnalysis";
-import { BrandAlignmentChart } from "@/components/BrandAlignmentChart";
-import { TrendAnalyticsDashboard } from "@/components/TrendAnalyticsDashboard";
-import { GeographicBrandMap } from "@/components/GeographicBrandMap";
-import { CollaborationMatrix } from "@/components/CollaborationMatrix";
 
 interface BrandProfile {
   id: string;
@@ -68,22 +64,6 @@ export default function BrandAnalysis() {
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
-  const [trendData, setTrendData] = useState<any>(null);
-  const [locationInsights, setLocationInsights] = useState<any[]>([]);
-  const [viewMode, setViewMode] = useState<'current' | 'historical'>('current');
-  const [sortBy, setSortBy] = useState<'relevance' | 'location' | 'trend'>('relevance');
-  const [chartData, setChartData] = useState<{
-    alignment: any[];
-    trends: any[];
-    geographic: any;
-    collaboration: any[];
-  }>({
-    alignment: [],
-    trends: [],
-    geographic: { userBrandLocation: null, locationData: [] },
-    collaboration: []
-  });
-  const [chartLoading, setChartLoading] = useState(false);
 
   const handleSynergyTrigger = async () => {
     try {
@@ -103,7 +83,6 @@ export default function BrandAnalysis() {
     
     if (id) {
       fetchBrandData();
-      fetchChartData();
       // Auto-trigger brand discovery if no existing analysis
       checkAndTriggerBrandDiscovery();
     }
@@ -158,14 +137,6 @@ export default function BrandAnalysis() {
         }
       }
 
-      // Fetch trend data and location insights if we have match analysis
-      if (analysis && analysis.matched_brands) {
-        await fetchTrendData(analysis);
-        const brands = Array.isArray(analysis.matched_brands) 
-          ? (analysis.matched_brands as unknown as MatchedBrand[])
-          : [];
-        await fetchLocationInsights(brands);
-      }
 
     } catch (error) {
       console.error('Error fetching brand data:', error);
@@ -254,119 +225,6 @@ export default function BrandAnalysis() {
     return interval;
   };
 
-  const fetchTrendData = async (analysis: any) => {
-    if (!id || !analysis) return;
-
-    try {
-      const { data, error } = await supabase.functions.invoke('analyze-brand-trends', {
-        body: { 
-          brandProfileId: id, 
-          currentAnalysis: analysis 
-        }
-      });
-
-      if (!error && data) {
-        setTrendData(data);
-      }
-    } catch (error) {
-      console.error('Error fetching trend data:', error);
-    }
-  };
-
-  const fetchLocationInsights = async (matchedBrands: any[]) => {
-    if (!id || !matchedBrands?.length) return;
-
-    try {
-      const { data, error } = await supabase.functions.invoke('analyze-geo-context', {
-        body: { 
-          brandProfileId: id, 
-          matchedBrands: matchedBrands 
-        }
-      });
-
-      if (!error && data) {
-        setLocationInsights(data.location_insights || []);
-      }
-    } catch (error) {
-      console.error('Error fetching location insights:', error);
-    }
-  };
-
-  const fetchChartData = async () => {
-    if (!id || !user) return;
-
-    setChartLoading(true);
-    try {
-      // Fetch all chart types in parallel
-      const chartTypes = ['alignment', 'trends', 'geographic', 'collaboration'];
-      const chartPromises = chartTypes.map(async (chartType) => {
-        const { data, error } = await supabase.functions.invoke('generate-chart-data', {
-          body: {
-            brandProfileId: id,
-            chartType,
-            timeRange: 'month'
-          }
-        });
-
-        if (error) {
-          console.error(`Error fetching ${chartType} chart data:`, error);
-          return { chartType, data: null };
-        }
-
-        return { chartType, data: data.data };
-      });
-
-      const results = await Promise.all(chartPromises);
-      
-      const newChartData = {
-        alignment: [],
-        trends: [],
-        geographic: { userBrandLocation: null, locationData: [] },
-        collaboration: []
-      };
-
-      results.forEach(({ chartType, data }) => {
-        if (data) {
-          newChartData[chartType as keyof typeof newChartData] = data;
-        }
-      });
-
-      setChartData(newChartData);
-    } catch (error) {
-      console.error('Error fetching chart data:', error);
-    } finally {
-      setChartLoading(false);
-    }
-  };
-
-  const getTrendIndicator = (brandName: string) => {
-    const trend = trendData?.trends?.find((t: any) => t.brand_name === brandName);
-    if (!trend) return null;
-
-    switch (trend.trend_direction) {
-      case 'rising':
-        return <span className="text-green-600 text-sm" title={`+${trend.trend_percentage}%`}>↗️</span>;
-      case 'falling':
-        return <span className="text-red-600 text-sm" title={`${trend.trend_percentage}%`}>↘️</span>;
-      case 'new':
-        return <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">New</Badge>;
-      default:
-        return <span className="text-gray-600 text-sm" title="Stable">➡️</span>;
-    }
-  };
-
-  const getLocationBadge = (brandName: string) => {
-    const insight = locationInsights?.find((li: any) => li.matched_brand_name === brandName);
-    if (!insight) return null;
-
-    if (insight.same_city) {
-      return <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">🏠 Same City</Badge>;
-    }
-    if (insight.same_country) {
-      return <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200">🌎 Same Country</Badge>;
-    }
-    return null;
-  };
 
   const getMatchTypeColor = (matchType: string) => {
     switch (matchType) {
@@ -538,48 +396,12 @@ export default function BrandAnalysis() {
       {matchAnalysis && matchAnalysis.matched_brands && matchAnalysis.matched_brands.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Users className="h-5 w-5" />
-                <span>AI-Discovered Aligned Brands ({matchAnalysis.match_count})</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setViewMode(viewMode === 'current' ? 'historical' : 'current')}
-                  className="flex items-center space-x-1"
-                >
-                  <Clock className="h-4 w-4" />
-                  <span>{viewMode === 'current' ? 'Current' : 'Historical'}</span>
-                </Button>
-                <div className="flex items-center space-x-1 border rounded-lg p-1">
-                  <Button
-                    variant={sortBy === 'relevance' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setSortBy('relevance')}
-                  >
-                    <BarChart3 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant={sortBy === 'location' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setSortBy('location')}
-                  >
-                    <Map className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant={sortBy === 'trend' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setSortBy('trend')}
-                  >
-                    <TrendingUp className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+            <CardTitle className="flex items-center space-x-2">
+              <Users className="h-5 w-5" />
+              <span>AI-Discovered Aligned Brands ({matchAnalysis.match_count})</span>
             </CardTitle>
             <CardDescription>
-              AI-powered cultural alignment with time-based trends and location prioritization
+              AI-powered cultural alignment analysis
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -600,10 +422,8 @@ export default function BrandAnalysis() {
                   <TableRow key={index}>
                     <TableCell>
                       <div>
-                        <div className="font-medium flex items-center gap-2">
+                        <div className="font-medium">
                           {brand.name}
-                          {getTrendIndicator(brand.name)}
-                          {getLocationBadge(brand.name)}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {brand.description}
@@ -679,48 +499,11 @@ export default function BrandAnalysis() {
       )}
 
       {/* Advanced Analysis Tabs */}
-      <Tabs defaultValue="analytics" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="analytics">Analytics Dashboard</TabsTrigger>
-          <TabsTrigger value="trends">Trends & Location</TabsTrigger>
+      <Tabs defaultValue="qloo" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="qloo">Qloo Analysis</TabsTrigger>
           <TabsTrigger value="synergy">Synergy Analysis</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="analytics" className="mt-6">
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <BrandAlignmentChart
-                data={chartData.alignment}
-                isLoading={chartLoading}
-                brandName={brandProfile?.brand_name || ''}
-              />
-              <CollaborationMatrix
-                data={chartData.collaboration}
-                isLoading={chartLoading}
-                onBrandSelect={(brandName) => {
-                  // Find brand in table and highlight it
-                  console.log('Selected brand:', brandName);
-                }}
-              />
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="trends" className="mt-6">
-          <div className="space-y-6">
-            <TrendAnalyticsDashboard
-              trendData={chartData.trends}
-              isLoading={chartLoading}
-              brandName={brandProfile?.brand_name || ''}
-            />
-            <GeographicBrandMap
-              locationData={chartData.geographic.locationData}
-              isLoading={chartLoading}
-              userBrandLocation={chartData.geographic.userBrandLocation}
-            />
-          </div>
-        </TabsContent>
 
         <TabsContent value="qloo" className="mt-6">
           <QlooAnalysis
@@ -728,7 +511,6 @@ export default function BrandAnalysis() {
             brandName={brandProfile.brand_name}
             onAnalysisUpdate={() => {
               fetchBrandData();
-              fetchChartData();
             }}
             onSynergyTrigger={handleSynergyTrigger}
           />
@@ -740,7 +522,6 @@ export default function BrandAnalysis() {
             brandName={brandProfile.brand_name}
             onAnalysisUpdate={() => {
               fetchBrandData();
-              fetchChartData();
             }}
           />
         </TabsContent>
