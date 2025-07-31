@@ -146,18 +146,19 @@ export function BrandTable({ brandProfiles, loading, onRefresh, onBrandDeleted }
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header with Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:gap-4 items-start sm:items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Brand Profiles</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Brand Profiles</h2>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Manage and analyze your {brandProfiles.length} brand profile{brandProfiles.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <Button onClick={() => navigate('/brand-builder')}>
+        <Button onClick={() => navigate('/brand-builder')} className="w-full sm:w-auto">
           <Plus className="w-4 h-4 mr-2" />
-          Create Brand Profile
+          <span className="hidden sm:inline">Create Brand Profile</span>
+          <span className="sm:hidden">Create Profile</span>
         </Button>
       </div>
 
@@ -195,18 +196,19 @@ export function BrandTable({ brandProfiles, loading, onRefresh, onBrandDeleted }
       </Card>
 
       {/* Brand Table */}
-      <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-8"></TableHead>
-              <TableHead>Brand Name</TableHead>
-              <TableHead>Industry</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Analysis Status</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
+      <Card className="overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-8"></TableHead>
+                <TableHead className="min-w-[180px]">Brand Name</TableHead>
+                <TableHead className="hidden sm:table-cell min-w-[120px]">Industry</TableHead>
+                <TableHead className="hidden md:table-cell min-w-[140px]">Location</TableHead>
+                <TableHead className="hidden lg:table-cell min-w-[140px]">Analysis Status</TableHead>
+                <TableHead className="min-w-[120px]">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
           <TableBody>
             {filteredBrands.map((brand) => (
               <>
@@ -231,21 +233,35 @@ export function BrandTable({ brandProfiles, loading, onRefresh, onBrandDeleted }
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
+                      <div className="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
                         <Building className="w-4 h-4 text-primary" />
                       </div>
-                      <div>
-                        <div className="font-medium">{brand.brand_name}</div>
-                        <div className="text-sm text-muted-foreground">
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium truncate">{brand.brand_name}</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">
                           Created {new Date(brand.created_at).toLocaleDateString()}
+                        </div>
+                        {/* Mobile-only info */}
+                        <div className="sm:hidden mt-1 space-y-1">
+                          <Badge variant="secondary" className="text-xs">{brand.industry || 'Not specified'}</Badge>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <MapPin className="w-3 h-3" />
+                            {brand.city_region && brand.country ? (
+                              <span>{brand.city_region}, {brand.country}</span>
+                            ) : brand.country ? (
+                              <span>{brand.country}</span>
+                            ) : (
+                              <span>Not specified</span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <Badge variant="secondary">{brand.industry || 'Not specified'}</Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <MapPin className="w-3 h-3" />
                       {brand.city_region && brand.country ? (
@@ -257,19 +273,21 @@ export function BrandTable({ brandProfiles, loading, onRefresh, onBrandDeleted }
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden lg:table-cell">
                     <div className="flex gap-2">
                       {getAnalysisStatus(brand.qloo_analysis_status)}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <Button
                         size="sm"
                         onClick={() => navigate(`/brand-analysis/${brand.id}`)}
+                        className="text-xs"
                       >
-                        <TrendingUp className="w-4 h-4 mr-1" />
-                        Analyze Brand
+                        <TrendingUp className="w-4 h-4 sm:mr-1" />
+                        <span className="hidden sm:inline">Analyze Brand</span>
+                        <span className="sm:hidden">Analyze</span>
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
@@ -379,6 +397,7 @@ export function BrandTable({ brandProfiles, loading, onRefresh, onBrandDeleted }
             ))}
           </TableBody>
         </Table>
+        </div>
       </Card>
 
       {filteredBrands.length === 0 && brandProfiles.length > 0 && (

@@ -26,7 +26,7 @@ const Index = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="pt-24 px-6 py-20 text-center relative overflow-hidden">
+      <section className="pt-20 sm:pt-24 px-4 sm:px-6 py-12 sm:py-20 text-center relative overflow-hidden">
         {/* Background orbital elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-20 left-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
@@ -40,7 +40,7 @@ const Index = () => {
             </span>
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-6 sm:mb-8 leading-tight">
             <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
               Find Your Perfect Brand
             </span>
@@ -48,19 +48,23 @@ const Index = () => {
             <span className="text-foreground">Collab Partner</span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed px-4">
             We analyze cultural overlaps to connect your brand with ideal partners based on shared audience taste, powered by AI & culture insights.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center w-full max-w-sm sm:max-w-none mx-auto">
             <Button 
               size="lg" 
-              className="text-lg px-8 py-6 bg-primary hover:bg-primary/90 text-primary-foreground hover:scale-105 transition-all duration-300"
+              className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 bg-primary hover:bg-primary/90 text-primary-foreground hover:scale-105 transition-all duration-300 min-h-[48px]"
               onClick={handleGetStarted}
             >
               Get Started
             </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-6 border-border hover:bg-card text-foreground">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 border-border hover:bg-card text-foreground min-h-[48px]"
+            >
               Watch Demo
             </Button>
           </div>
@@ -68,18 +72,18 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="px-6 py-20 bg-card/30">
+      <section id="features" className="px-4 sm:px-6 py-12 sm:py-20 bg-card/30">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-foreground">
               What You Can Do with <span className="text-primary">BrandMerge</span>
             </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
               From cultural analysis to partnership matching, BrandMerge gives you a full collaboration suite powered by the latest AI — all in one place.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             <Card className="bg-card/50 backdrop-blur-sm border-border hover:bg-card/70 transition-all duration-300 hover:-translate-y-2 group">
               <CardHeader className="text-center pb-6">
                 <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
@@ -126,30 +130,30 @@ const Index = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="px-6 py-20">
+      <section className="px-4 sm:px-6 py-12 sm:py-20">
         <div className="container mx-auto max-w-5xl">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-6 text-foreground">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 text-foreground">
               Brands Already Using <span className="text-primary">BrandMerge AI</span>
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-base sm:text-lg lg:text-xl text-muted-foreground px-4">
               See what industry leaders are saying about our platform
             </p>
           </div>
           
           <AutoSlider />
           
-          <div className="mt-16 flex flex-wrap justify-center items-center gap-12 opacity-60">
-            <div className="text-2xl font-bold text-muted-foreground hover:text-primary transition-colors">TechFlow</div>
-            <div className="text-2xl font-bold text-muted-foreground hover:text-primary transition-colors">EcoLux</div>
-            <div className="text-2xl font-bold text-muted-foreground hover:text-primary transition-colors">CreativeHub</div>
-            <div className="text-2xl font-bold text-muted-foreground hover:text-primary transition-colors">BrandWave</div>
+          <div className="mt-8 sm:mt-16 flex flex-wrap justify-center items-center gap-6 sm:gap-8 lg:gap-12 opacity-60">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-muted-foreground hover:text-primary transition-colors">TechFlow</div>
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-muted-foreground hover:text-primary transition-colors">EcoLux</div>
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-muted-foreground hover:text-primary transition-colors">CreativeHub</div>
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-muted-foreground hover:text-primary transition-colors">BrandWave</div>
           </div>
         </div>
       </section>
 
       {/* How to Use Section */}
-      <section id="how-it-works" className="px-6 py-20 bg-card/30">
+      <section id="how-it-works" className="px-4 sm:px-6 py-12 sm:py-20 bg-card/30">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
@@ -160,7 +164,7 @@ const Index = () => {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
             <Card className="bg-card/50 backdrop-blur-sm border-border hover:bg-card/70 transition-all duration-300 group text-center">
               <CardHeader className="pb-6">
                 <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
@@ -221,7 +225,7 @@ const Index = () => {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="px-6 py-20">
+      <section id="pricing" className="px-4 sm:px-6 py-12 sm:py-20">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
@@ -232,7 +236,7 @@ const Index = () => {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
             {/* Free Plan */}
             <Card className="bg-card/50 backdrop-blur-sm border-border hover:bg-card/70 transition-all duration-300 hover:-translate-y-2 flex flex-col">
               <CardHeader className="text-center pb-6">

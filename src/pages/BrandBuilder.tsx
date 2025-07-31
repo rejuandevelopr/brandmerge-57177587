@@ -213,10 +213,10 @@ const BrandBuilder = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-8 max-w-2xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Create Brand Profile</h1>
-          <p className="text-muted-foreground">
+      <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 max-w-2xl">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Create Brand Profile</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Tell us about your brand to find the perfect collaboration partners
           </p>
         </div>
@@ -234,17 +234,17 @@ const BrandBuilder = () => {
           <Progress value={(currentStep / STEPS.length) * 100} className="mb-6" />
           
           {/* Step Indicator */}
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex justify-between items-center mb-6 sm:mb-8 overflow-x-auto">
             {STEPS.map((step, index) => (
               <div
                 key={step.id}
-                className={`flex flex-col items-center cursor-pointer transition-all ${
+                className={`flex flex-col items-center cursor-pointer transition-all flex-shrink-0 ${
                   step.id <= currentStep ? 'text-primary' : 'text-muted-foreground'
                 }`}
                 onClick={() => goToStep(step.id)}
               >
                 <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium border-2 transition-all ${
+                  className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-medium border-2 transition-all ${
                     step.id < currentStep
                       ? 'bg-primary text-primary-foreground border-primary'
                       : step.id === currentStep
@@ -252,17 +252,20 @@ const BrandBuilder = () => {
                       : 'border-muted-foreground/30 bg-background'
                   }`}
                 >
-                  {step.id < currentStep ? <Check className="w-4 h-4" /> : step.id}
+                  {step.id < currentStep ? <Check className="w-3 h-3 sm:w-4 sm:h-4" /> : step.id}
                 </div>
-                <span className="text-xs mt-2 text-center max-w-20 leading-tight">
+                <span className="text-xs mt-1 sm:mt-2 text-center max-w-16 sm:max-w-20 leading-tight hidden sm:block">
                   {step.title}
+                </span>
+                <span className="text-xs mt-1 text-center sm:hidden">
+                  {step.id}
                 </span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Step Content */}
           {currentStep === 1 && (
             <Card>

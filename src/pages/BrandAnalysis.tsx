@@ -315,38 +315,41 @@ export default function BrandAnalysis() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-6">
+    <div className="container mx-auto px-4 py-6 sm:py-8 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" onClick={() => navigate('/dashboard')}>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <Button variant="ghost" onClick={() => navigate('/dashboard')} className="self-start">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
+            <span className="hidden sm:inline">Back to Dashboard</span>
+            <span className="sm:hidden">Back</span>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">{brandProfile.brand_name} Analysis</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">{brandProfile.brand_name} Analysis</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
               {brandProfile.industry} • {brandProfile.country || brandProfile.city_region}
             </p>
           </div>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-3">
           {analyzing && (
-            <div className="flex items-center space-x-2">
-              <Badge variant="default" className="bg-blue-100 text-blue-800">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <Badge variant="default" className="bg-blue-100 text-blue-800 self-start">
                 Active
               </Badge>
-              <Button disabled className="flex items-center space-x-2">
+              <Button disabled className="flex items-center gap-2 text-sm">
                 <Search className="h-4 w-4 animate-spin" />
-                <span>Discovering Brands...</span>
+                <span className="hidden sm:inline">Discovering Brands...</span>
+                <span className="sm:hidden">Discovering...</span>
               </Button>
             </div>
           )}
           
           {!analyzing && (
-            <Button onClick={startAnalysis} variant="outline" className="flex items-center space-x-2">
+            <Button onClick={startAnalysis} variant="outline" className="flex items-center gap-2 text-sm">
               <Search className="h-4 w-4" />
-              <span>Discover Aligned Brands</span>
+              <span className="hidden sm:inline">Discover Aligned Brands</span>
+              <span className="sm:hidden">Discover</span>
             </Button>
           )}
         </div>
@@ -387,7 +390,7 @@ export default function BrandAnalysis() {
             <p className="text-muted-foreground">{brandProfile.mission_statement}</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <h4 className="font-semibold mb-2 flex items-center">
                 <MapPin className="h-4 w-4 mr-2" />
@@ -474,17 +477,17 @@ export default function BrandAnalysis() {
               AI-powered analysis discovering up to 15 culturally aligned brands
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                      <TableHead>Brand Name</TableHead>
-                      <TableHead>Industry</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>Cultural Align %</TableHead>
-                      <TableHead>Collaboration Possibilities</TableHead>
-                      <TableHead>Qloo Overlap %</TableHead>
-                      <TableHead>Actions</TableHead>
+                      <TableHead className="min-w-[150px]">Brand Name</TableHead>
+                      <TableHead className="hidden sm:table-cell min-w-[120px]">Industry</TableHead>
+                      <TableHead className="hidden md:table-cell min-w-[120px]">Location</TableHead>
+                      <TableHead className="hidden lg:table-cell min-w-[100px]">Cultural Align %</TableHead>
+                      <TableHead className="hidden xl:table-cell min-w-[160px]">Collaboration Possibilities</TableHead>
+                      <TableHead className="hidden lg:table-cell min-w-[100px]">Qloo Overlap %</TableHead>
+                      <TableHead className="min-w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
