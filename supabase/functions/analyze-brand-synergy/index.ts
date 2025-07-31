@@ -14,7 +14,7 @@ interface SynergyRequest {
 interface GptSynergyResponse {
   synergy_summary: string;
   collab_ideas: string[];
-  pitch_line: string;
+  growth_opportunity_forecast: string;
   match_score: number;
 }
 
@@ -109,7 +109,7 @@ Provide analysis in the following JSON format only (no additional text):
 {
   "synergy_summary": "50-75 word summary of why these brands would work well together",
   "collab_ideas": ["idea 1", "idea 2", "idea 3"],
-  "pitch_line": "1-2 sentence compelling outreach message",
+  "growth_opportunity_forecast": "Data-driven forecast of tangible market gains both brands could expect from partnership, including potential increases in combined audience reach (with %), market share growth in key regions (with %), revenue uplift projections from joint campaigns (with %), and brand awareness expansion in new demographics. Be specific with percentage estimates where possible.",
   "match_score": number between 0-100 representing overall partnership potential
 }`;
 
@@ -152,7 +152,7 @@ Provide analysis in the following JSON format only (no additional text):
 
         // Validate required fields
         if (!synergyAnalysis.synergy_summary || !synergyAnalysis.collab_ideas || 
-            !synergyAnalysis.pitch_line || typeof synergyAnalysis.match_score !== 'number') {
+            !synergyAnalysis.growth_opportunity_forecast || typeof synergyAnalysis.match_score !== 'number') {
           throw new Error('Incomplete GPT analysis response');
         }
 
@@ -165,7 +165,7 @@ Provide analysis in the following JSON format only (no additional text):
             compared_brand_category: similarBrand.category,
             synergy_summary: synergyAnalysis.synergy_summary,
             collab_ideas: synergyAnalysis.collab_ideas,
-            pitch_line: synergyAnalysis.pitch_line,
+            growth_opportunity_forecast: synergyAnalysis.growth_opportunity_forecast,
             match_score: Math.min(100, Math.max(0, Math.round(synergyAnalysis.match_score))),
             qloo_overlap_score: similarBrand.overlapScore,
             gpt_analysis_status: 'completed'

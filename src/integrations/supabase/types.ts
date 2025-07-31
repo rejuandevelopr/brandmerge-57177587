@@ -367,6 +367,7 @@ export type Database = {
           created_at: string
           error_message: string | null
           gpt_analysis_status: string
+          growth_opportunity_forecast: string | null
           id: string
           match_score: number | null
           pitch_line: string | null
@@ -382,6 +383,7 @@ export type Database = {
           created_at?: string
           error_message?: string | null
           gpt_analysis_status?: string
+          growth_opportunity_forecast?: string | null
           id?: string
           match_score?: number | null
           pitch_line?: string | null
@@ -397,6 +399,7 @@ export type Database = {
           created_at?: string
           error_message?: string | null
           gpt_analysis_status?: string
+          growth_opportunity_forecast?: string | null
           id?: string
           match_score?: number | null
           pitch_line?: string | null

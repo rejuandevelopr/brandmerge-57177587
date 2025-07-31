@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, Brain, Copy, Check, Lightbulb, Target } from 'lucide-react';
+import { Loader2, Brain, Copy, Check, Lightbulb, Target, TrendingUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -13,7 +13,7 @@ interface SynergyData {
   compared_brand_category: string | null;
   synergy_summary: string | null;
   collab_ideas: any;
-  pitch_line: string | null;
+  growth_opportunity_forecast: string | null;
   match_score: number | null;
   qloo_overlap_score: number | null;
   gpt_analysis_status: string;
@@ -34,7 +34,7 @@ const BrandSynergyAnalysis: React.FC<BrandSynergyAnalysisProps> = ({
   const [synergyData, setSynergyData] = useState<SynergyData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [analysisStatus, setAnalysisStatus] = useState<string>('not_analyzed');
-  const [copiedPitch, setCopiedPitch] = useState<string | null>(null);
+  const [copiedForecast, setCopiedForecast] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -126,14 +126,14 @@ const BrandSynergyAnalysis: React.FC<BrandSynergyAnalysisProps> = ({
     setTimeout(() => clearInterval(interval), 120000);
   };
 
-  const copyPitchLine = async (pitchLine: string, brandName: string) => {
+  const copyGrowthForecast = async (forecast: string, brandName: string) => {
     try {
-      await navigator.clipboard.writeText(pitchLine);
-      setCopiedPitch(brandName);
-      setTimeout(() => setCopiedPitch(null), 2000);
+      await navigator.clipboard.writeText(forecast);
+      setCopiedForecast(brandName);
+      setTimeout(() => setCopiedForecast(null), 2000);
       toast({
         title: "Copied!",
-        description: "Pitch line copied to clipboard",
+        description: "Growth opportunity forecast copied to clipboard",
       });
     } catch (error) {
       toast({
@@ -297,27 +297,32 @@ const BrandSynergyAnalysis: React.FC<BrandSynergyAnalysisProps> = ({
                       </div>
                     )}
 
-                    {synergy.pitch_line && (
+                    {synergy.growth_opportunity_forecast && (
                       <div>
                         <Separator className="my-3" />
                         <div className="flex items-center justify-between">
-                          <h5 className="text-sm font-medium">Pitch Line</h5>
+                          <h5 className="text-sm font-medium flex items-center gap-2">
+                            <TrendingUp className="h-4 w-4" />
+                            Growth Opportunity Forecast
+                          </h5>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => copyPitchLine(synergy.pitch_line!, synergy.compared_brand_name)}
+                            onClick={() => copyGrowthForecast(synergy.growth_opportunity_forecast!, synergy.compared_brand_name)}
                             className="h-auto p-1"
                           >
-                            {copiedPitch === synergy.compared_brand_name ? (
+                            {copiedForecast === synergy.compared_brand_name ? (
                               <Check className="h-4 w-4 text-green-600" />
                             ) : (
                               <Copy className="h-4 w-4" />
                             )}
                           </Button>
                         </div>
-                        <p className="text-sm bg-muted p-3 rounded mt-2 italic">
-                          "{synergy.pitch_line}"
-                        </p>
+                        <div className="bg-gradient-to-r from-primary/10 to-secondary/10 p-3 rounded-lg border border-primary/20 mt-2">
+                          <p className="text-sm font-medium text-foreground">
+                            {synergy.growth_opportunity_forecast}
+                          </p>
+                        </div>
                       </div>
                     )}
                   </>
