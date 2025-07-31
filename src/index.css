@@ -19,11 +19,11 @@ All colors MUST be HSL.
     --popover-foreground: 240 10% 3.9%;
 
     /* Main theme colors as specified */
-    --primary: 212 73% 68%; /* rgb(114, 167, 232) converted to HSL */
+    --primary: 240 89% 25%; /* #0F0F71 converted to HSL */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 19 97% 66%; /* rgb(253, 129, 82) converted to HSL */
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
 
     --muted: 210 40% 98%;
     --muted-foreground: 215.4 16.3% 46.9%;
@@ -36,25 +36,18 @@ All colors MUST be HSL.
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 212 73% 68%;
+    --ring: 240 89% 25%;
 
     --radius: 0.75rem;
 
-    /* Hero gradient as specified */
-    --hero-gradient: linear-gradient(111.6deg, rgb(114, 167, 232) 9.4%, rgb(253, 129, 82) 43.9%, rgb(253, 129, 82) 54.8%, rgb(249, 202, 86) 86.3%);
-    
-    /* Clean professional gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(212 73% 68%), hsl(19 97% 66%));
-    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 40% 98%));
-
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 240 10% 3.9%;
-    --sidebar-primary: 212 73% 68%;
+    --sidebar-primary: 240 89% 25%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 210 40% 95%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 214.3 31.8% 91.4%;
-    --sidebar-ring: 212 73% 68%;
+    --sidebar-ring: 240 89% 25%;
   }
 
   .dark {
@@ -68,11 +61,11 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
 
-    --primary: 212 73% 68%;
+    --primary: 240 89% 25%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 19 97% 66%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
 
     --muted: 210 40% 98%;
     --muted-foreground: 215.4 16.3% 46.9%;
@@ -85,16 +78,16 @@ All colors MUST be HSL.
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 212 73% 68%;
+    --ring: 240 89% 25%;
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 240 10% 3.9%;
-    --sidebar-primary: 212 73% 68%;
+    --sidebar-primary: 240 89% 25%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 210 40% 95%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 214.3 31.8% 91.4%;
-    --sidebar-ring: 212 73% 68%;
+    --sidebar-ring: 240 89% 25%;
   }
 }
 

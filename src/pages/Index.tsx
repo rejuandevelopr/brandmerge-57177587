@@ -23,7 +23,30 @@ const Index = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="pt-24 px-6 py-20 text-center relative overflow-hidden" style={{background: 'linear-gradient(111.6deg, rgb(114, 167, 232) 9.4%, rgb(253, 129, 82) 43.9%, rgb(253, 129, 82) 54.8%, rgb(249, 202, 86) 86.3%)'}}>
+      <section className="pt-24 px-6 py-20 text-center relative overflow-hidden bg-white">
+        {/* Gradient Overlays */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div 
+            className="absolute inset-0"
+            style={{
+              background: 'radial-gradient(70.71% 70.71% at 50% 50%, #000 0%, #000 20%, rgba(0, 0, 0, 0.00) 75%)'
+            }}
+          />
+          <div 
+            className="absolute top-20 left-1/4 w-96 h-96 rounded-full"
+            style={{
+              background: 'rgba(74, 196, 84, 0.09)',
+              filter: 'blur(50px)'
+            }}
+          />
+          <div 
+            className="absolute top-32 right-1/4 w-80 h-80 rounded-full"
+            style={{
+              background: 'rgba(103, 132, 239, 0.11)',
+              filter: 'blur(50px)'
+            }}
+          />
+        </div>
         <div className="container mx-auto max-w-5xl relative z-10">
           <div className="text-center mb-8">
             <span className="text-sm text-white/80 tracking-wider uppercase font-body">
@@ -31,20 +54,20 @@ const Index = () => {
             </span>
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-heading font-bold mb-8 leading-tight text-white">
+          <h1 className="text-5xl md:text-7xl font-heading font-bold mb-8 leading-tight text-foreground">
             Find Your Perfect Brand
             <br />
             Collab Partner
           </h1>
           
-          <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed font-body">
+          <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed font-body">
             We analyze cultural overlaps to connect your brand with ideal partners based on shared audience taste, powered by AI & culture insights.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button 
               size="lg" 
-              className="text-lg px-8 py-6 bg-white text-primary hover:bg-white/90 hover:scale-105 transition-all duration-300 font-body font-medium"
+              className="text-lg px-8 py-6 hover:scale-105 transition-all duration-300 font-body font-medium"
               onClick={handleGetStarted}
             >
               Get Started
@@ -52,7 +75,7 @@ const Index = () => {
             <Button 
               variant="outline" 
               size="lg" 
-              className="text-lg px-8 py-6 border-white/30 bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm font-body"
+              className="text-lg px-8 py-6 font-body"
             >
               Watch Demo
             </Button>
