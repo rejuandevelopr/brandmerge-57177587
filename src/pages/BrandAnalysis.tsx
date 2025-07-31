@@ -59,6 +59,16 @@ export default function BrandAnalysis() {
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
 
+  const handleSynergyTrigger = async () => {
+    try {
+      await supabase.functions.invoke('analyze-brand-synergy', {
+        body: { brandProfileId: id }
+      });
+    } catch (error) {
+      console.error('Failed to auto-trigger synergy analysis:', error);
+    }
+  };
+
   useEffect(() => {
     if (!user) {
       navigate('/auth');
@@ -416,6 +426,7 @@ export default function BrandAnalysis() {
         brandProfileId={brandProfile.id}
         brandName={brandProfile.brand_name}
         onAnalysisUpdate={fetchBrandData}
+        onSynergyTrigger={handleSynergyTrigger}
       />
 
       {/* Brand Synergy Analysis */}

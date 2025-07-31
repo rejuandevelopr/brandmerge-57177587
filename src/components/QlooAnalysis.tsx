@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { AlertTriangle, RefreshCw, CheckCircle, Clock, TrendingUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import BrandSynergyAnalysis from './BrandSynergyAnalysis';
+
 
 interface SimilarBrand {
   name: string;
@@ -29,9 +29,10 @@ interface QlooAnalysisProps {
   brandProfileId: string;
   brandName: string;
   onAnalysisUpdate?: () => void;
+  onSynergyTrigger?: () => void;
 }
 
-export default function QlooAnalysis({ brandProfileId, brandName, onAnalysisUpdate }: QlooAnalysisProps) {
+export default function QlooAnalysis({ brandProfileId, brandName, onAnalysisUpdate, onSynergyTrigger }: QlooAnalysisProps) {
   const [analysisData, setAnalysisData] = useState<QlooAnalysisData | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -115,17 +116,9 @@ export default function QlooAnalysis({ brandProfileId, brandName, onAnalysisUpda
           setIsAnalyzing(false);
           onAnalysisUpdate?.();
           
-          // Auto-trigger synergy analysis after successful Qloo analysis
+          // Notify parent component to trigger synergy analysis
           if (currentData?.status === 'completed') {
-            setTimeout(async () => {
-              try {
-                await supabase.functions.invoke('analyze-brand-synergy', {
-                  body: { brandProfileId }
-                });
-              } catch (error) {
-                console.error('Failed to auto-trigger synergy analysis:', error);
-              }
-            }, 1000);
+            onSynergyTrigger?.();
           }
         } else if (pollCount >= maxPolls) {
           // Timeout after 2 minutes
@@ -292,13 +285,6 @@ export default function QlooAnalysis({ brandProfileId, brandName, onAnalysisUpda
           </div>
         )}
 
-        {analysisData?.status === 'completed' && (
-          <BrandSynergyAnalysis 
-            brandProfileId={brandProfileId}
-            brandName={brandName}
-            onAnalysisUpdate={onAnalysisUpdate}
-          />
-        )}
 
         {!analysisData && (
           <div className="text-center py-8">
