@@ -206,13 +206,13 @@ const Index = () => {
             <Card className="bg-card/50 backdrop-blur-sm border-border hover:bg-card/70 transition-all duration-300 group text-center">
               <CardHeader className="pb-6">
                 <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                  <MessageSquare className="w-8 h-8 text-primary" />
+                  <ArrowRight className="w-8 h-8 text-primary" />
                 </div>
-                <CardTitle className="text-lg text-foreground">4. Connect & Collaborate</CardTitle>
+                <CardTitle className="text-lg text-foreground">4. Explore Brands</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-muted-foreground">
-                  Start conversations and build meaningful partnerships with aligned brands.
+                  Access detailed brand profiles and visit their websites to learn more about potential partners.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -282,7 +282,7 @@ const Index = () => {
                 </div>
                 <div className="flex items-center gap-3">
                   <CheckCircle className="w-5 h-5 text-primary" />
-                  <span className="text-muted-foreground">Direct messaging</span>
+                  <span className="text-muted-foreground">Brand website access</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <CheckCircle className="w-5 h-5 text-primary" />
