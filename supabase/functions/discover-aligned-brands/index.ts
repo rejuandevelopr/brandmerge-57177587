@@ -142,108 +142,42 @@ async function discoverBrandsWithChatGPT(brandProfile: any, openaiApiKey: string
   const culturalMarkers = brandProfile.cultural_taste_markers?.join(', ') || '';
   const collaborationInterests = brandProfile.collaboration_interests?.join(', ') || '';
   const location = brandProfile.country || brandProfile.city_region || '';
-  const city = brandProfile.city_region || '';
-  const country = brandProfile.country || '';
 
-  // Enhanced location context for geographic priority
-  const getLocationContext = (city: string, country: string): string => {
-    const metroAreas = {
-      'New York': 'New York metropolitan area including NYC, Brooklyn, Queens, Manhattan, and surrounding boroughs',
-      'Los Angeles': 'Greater Los Angeles area including LA, Hollywood, Santa Monica, Beverly Hills',
-      'San Francisco': 'San Francisco Bay Area including SF, Palo Alto, Oakland, San Jose',
-      'Chicago': 'Chicago metropolitan area including downtown Chicago and suburbs',
-      'Boston': 'Greater Boston area including Cambridge, Somerville',
-      'Seattle': 'Seattle metropolitan area including Bellevue, Redmond'
-    };
-    
-    for (const [metro, description] of Object.entries(metroAreas)) {
-      if (city.toLowerCase().includes(metro.toLowerCase())) {
-        return description;
-      }
-    }
-    
-    return `${city}, ${country} and surrounding metropolitan area`;
-  };
+  const prompt = `Find ${brandCount} real brands that could partner with "${brandProfile.brand_name}".
 
-  const locationContext = city && country ? getLocationContext(city, country) : location;
+TARGET BRAND PROFILE:
+- Name: ${brandProfile.brand_name}
+- Industry: ${brandProfile.industry}
+- Location: ${location}
+- Mission: ${brandProfile.mission_statement}
+- Cultural Markers: ${culturalMarkers}
+- Collaboration Interests: ${collaborationInterests}
 
-  const prompt = `
-You are an expert brand partnership analyst specializing in finding geographically strategic and culturally aligned brand partnerships.
+Find brands that:
+1. Share similar values and target audiences
+2. Are geographically accessible (prioritize ${location} and surrounding areas)
+3. Could realistically collaborate (events, partnerships, cross-promotions)
+4. Are complementary rather than direct competitors
 
-TARGET BRAND: "${brandProfile.brand_name}"
-Industry: ${brandProfile.industry}
-Location: ${location}
-Location Context: ${locationContext}
-Mission: ${brandProfile.mission_statement}
-Cultural Taste Markers: ${culturalMarkers}
-Collaboration Interests: ${collaborationInterests}
-
-CRITICAL GEOGRAPHIC PRIORITY INSTRUCTION:
-This analysis must prioritize LOCAL and REGIONAL brand partnerships for practical collaboration opportunities.
-
-TIERED DISCOVERY STRATEGY - Find exactly ${brandCount} brands in this exact order:
-${brandCount <= 15 ? `
-1. TIER 1 (${Math.round(brandCount * 0.67)} brands): Same city/metropolitan area as ${locationContext}
-2. TIER 2 (${Math.round(brandCount * 0.33)} brands): Same country/region (${country})
-` : brandCount <= 25 ? `
-1. TIER 1 (${Math.round(brandCount * 0.6)} brands): Same city/metropolitan area as ${locationContext}
-2. TIER 2 (${Math.round(brandCount * 0.4)} brands): Same country/region (${country})
-` : `
-1. TIER 1 (${Math.round(brandCount * 0.57)} brands): Same city/metropolitan area as ${locationContext}
-2. TIER 2 (${Math.round(brandCount * 0.43)} brands): Same country/region (${country})
-`}
-   - Local brands enable in-person collaborations, events, shared logistics
-   - Search specifically for: "${city} brands", "local ${city} companies", "${city} startups"
-   - National brands provide expansion opportunities within ${country}
-   - Prioritize brands that could expand to ${city} or vice versa
-
-SEARCH CRITERIA (in priority order):
-1. GEOGRAPHIC PROXIMITY: Prioritize brands within 50 miles of ${city || location}
-2. Cultural values alignment and aesthetic similarity
-3. Target similar audiences but aren't direct competitors
-4. Partnership-friendly with history of collaborations
-5. Complementary rather than competing offerings
-
-LOCAL PARTNERSHIP FOCUS:
-- Look for brands that could share retail spaces, co-host events
-- Consider local supply chain and logistics advantages  
-- Focus on brands active in local business communities
-- Include emerging local brands alongside established ones
-
-REQUIRED OUTPUT: Return a valid JSON array with exactly this structure:
+Return ONLY a valid JSON array with this exact structure:
 [
   {
-    "name": "Exact Brand Name",
-    "industry": "Specific Industry", 
-    "location": "City, State/Province, Country (be specific)",
-    "culturalTasteMarkers": ["marker1", "marker2", "marker3"],
-    "collaborationInterests": ["partnership type1", "partnership type2"],
-    "website": "https://website.com (if found)",
-    "description": "Brief description under 100 chars emphasizing match and location",
-    "matchScore": 85,
-    "sourceUrl": "Source where you found this info",
-    "culturalAlignScore": 85,
+    "name": "Brand Name",
+    "industry": "Industry",
+    "location": "City, Country",
+    "culturalTasteMarkers": ["marker1", "marker2"],
+    "collaborationInterests": ["type1", "type2"],
+    "website": "https://website.com",
+    "description": "Brief description",
+    "matchScore": 75,
+    "sourceUrl": "",
+    "culturalAlignScore": 75,
     "collaborationPossibility": "High",
-    "collaborationDescription": "Local presence enables easy collaboration"
+    "collaborationDescription": "Partnership potential"
   }
 ]
 
-SCORING GUIDELINES:
-- Local brands (same city): Base score 75-95
-- Regional brands (same country): Base score 65-85  
-- International brands: Maximum score 85, only if exceptional alignment
-
-IMPORTANT RULES:
-- Return EXACTLY ${brandCount} brands, no more, no less
-${brandCount <= 15 ? `- 67% of results MUST be from ${locationContext}, 33% from ${country}` : 
-  brandCount <= 25 ? `- 60% of results MUST be from ${locationContext}, 40% from ${country}` :
-  `- 57% of results MUST be from ${locationContext}, 43% from ${country}`}
-- Only include REAL, existing brands you can find information about
-- Be specific about exact locations (include city, state/province, country)
-- Emphasize LOCAL collaboration opportunities in descriptions
-- Prioritize brands with physical presence that enables real-world partnerships
-
-Focus on brands that ${brandProfile.brand_name} could realistically partner with for local events, shared marketing, or regional expansion.`;
+Return exactly ${brandCount} brands as a valid JSON array.`;
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -253,16 +187,16 @@ Focus on brands that ${brandProfile.brand_name} could realistically partner with
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4o-mini',
         messages: [
           { 
             role: 'system', 
-            content: 'You are a brand partnership expert. Return ONLY valid JSON arrays. Keep brand descriptions under 100 characters. Focus on real, existing brands.' 
+            content: 'You are a brand partnership expert. Return ONLY valid JSON arrays. Focus on real, existing brands.' 
           },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.2,
-        max_tokens: 4000,
+        temperature: 0.3,
+        max_tokens: 2500,
       }),
     });
 
@@ -271,80 +205,33 @@ Focus on brands that ${brandProfile.brand_name} could realistically partner with
     
     if (content) {
       try {
-        // Clean the response to ensure it's valid JSON
+        // Simple JSON extraction and parsing
         const cleanContent = content.trim();
-        
-        // Try to extract JSON array from response
         let jsonString = cleanContent;
-        const jsonMatch = cleanContent.match(/\[[\s\S]*?\]/);
+        
+        // Extract JSON array if wrapped in other text
+        const jsonMatch = cleanContent.match(/\[[\s\S]*\]/);
         if (jsonMatch) {
           jsonString = jsonMatch[0];
         }
         
-        // Fallback parsing for partial JSON
-        let discoveredBrands;
-        try {
-          discoveredBrands = JSON.parse(jsonString);
-        } catch (initialParseError) {
-          console.log('Initial parse failed, trying fallback parsing...');
-          
-          // Try to fix incomplete JSON by adding closing brackets
-          let fixedJson = jsonString;
-          if (!fixedJson.endsWith(']')) {
-            // Count open brackets vs close brackets
-            const openBrackets = (fixedJson.match(/\[/g) || []).length;
-            const closeBrackets = (fixedJson.match(/\]/g) || []).length;
-            const openBraces = (fixedJson.match(/\{/g) || []).length;
-            const closeBraces = (fixedJson.match(/\}/g) || []).length;
-            
-            // Close incomplete objects and arrays
-            for (let i = 0; i < openBraces - closeBraces; i++) {
-              fixedJson += '}';
-            }
-            for (let i = 0; i < openBrackets - closeBrackets; i++) {
-              fixedJson += ']';
-            }
-          }
-          
-          try {
-            discoveredBrands = JSON.parse(fixedJson);
-          } catch (fallbackError) {
-            console.error('Fallback parsing also failed:', fallbackError);
-            return [];
-          }
-        }
+        const discoveredBrands = JSON.parse(jsonString);
         console.log(`ChatGPT discovered ${discoveredBrands.length} aligned brands`);
         
-        // Validate and filter the results
+        // Simple validation and processing
         const validBrands = discoveredBrands.filter((brand: any) => 
           brand.name && 
           brand.industry && 
           brand.description && 
           typeof brand.matchScore === 'number' &&
-          brand.matchScore >= 40
-        ).map((brand: any) => {
-          // Apply geographic proximity scoring boost
-          const geographicBoost = calculateGeographicBoost(brand, brandProfile);
-          const adjustedMatchScore = Math.min(95, brand.matchScore + geographicBoost);
-          
-          return {
-            ...brand,
-            matchScore: adjustedMatchScore,
-            culturalAlignScore: brand.culturalAlignScore || brand.matchScore,
-            collaborationPossibility: brand.collaborationPossibility || determineCollaborationLevel(brand),
-            collaborationDescription: brand.collaborationDescription || generateCollaborationDescription(brand)
-          };
-        }).sort((a, b) => {
-          // Sort by geographic proximity first, then by match score
-          const aIsLocal = isLocalBrand(a, brandProfile);
-          const bIsLocal = isLocalBrand(b, brandProfile);
-          
-          if (aIsLocal && !bIsLocal) return -1;
-          if (!aIsLocal && bIsLocal) return 1;
-          
-          // If both are local or both are non-local, sort by match score
-          return b.matchScore - a.matchScore;
-        });
+          brand.matchScore >= 20 // Lowered threshold
+        ).map((brand: any) => ({
+          ...brand,
+          matchScore: brand.matchScore || 75,
+          culturalAlignScore: brand.culturalAlignScore || brand.matchScore || 75,
+          collaborationPossibility: brand.collaborationPossibility || 'Medium',
+          collaborationDescription: brand.collaborationDescription || 'Partnership potential'
+        }));
         
         return Array.isArray(validBrands) ? validBrands : [];
       } catch (parseError) {
