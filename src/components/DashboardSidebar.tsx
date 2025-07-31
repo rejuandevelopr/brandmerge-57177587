@@ -26,10 +26,6 @@ import { Button } from '@/components/ui/button';
 const navigationItems = [
   { title: 'Overview', url: '/dashboard', icon: BarChart3 },
   { title: 'Brand Profiles', url: '/dashboard/brands', icon: Building2 },
-  { title: 'Discovery', url: '/discovery', icon: Search },
-  { title: 'Trending', url: '/dashboard/trending', icon: TrendingUp },
-  { title: 'Connections', url: '/connections', icon: MessageSquare },
-  { title: 'Global Insights', url: '/dashboard/insights', icon: Globe },
 ];
 
 const quickActions = [

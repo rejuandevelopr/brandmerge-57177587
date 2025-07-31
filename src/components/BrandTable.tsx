@@ -265,13 +265,6 @@ export function BrandTable({ brandProfiles, loading, onRefresh, onBrandDeleted }
                   <TableCell>
                     <div className="flex gap-2">
                       <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => navigate(`/brand-profile/${brand.id}`)}
-                      >
-                        View Details
-                      </Button>
-                      <Button
                         size="sm"
                         onClick={() => navigate(`/brand-analysis/${brand.id}`)}
                       >
