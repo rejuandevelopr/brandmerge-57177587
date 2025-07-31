@@ -11,6 +11,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import QlooAnalysis from "@/components/QlooAnalysis";
 import BrandSynergyAnalysis from "@/components/BrandSynergyAnalysis";
+import { BrandAlignmentChart } from "@/components/BrandAlignmentChart";
+import { TrendAnalyticsDashboard } from "@/components/TrendAnalyticsDashboard";
+import { GeographicBrandMap } from "@/components/GeographicBrandMap";
+import { CollaborationMatrix } from "@/components/CollaborationMatrix";
 
 interface BrandProfile {
   id: string;
@@ -68,6 +72,18 @@ export default function BrandAnalysis() {
   const [locationInsights, setLocationInsights] = useState<any[]>([]);
   const [viewMode, setViewMode] = useState<'current' | 'historical'>('current');
   const [sortBy, setSortBy] = useState<'relevance' | 'location' | 'trend'>('relevance');
+  const [chartData, setChartData] = useState<{
+    alignment: any[];
+    trends: any[];
+    geographic: any;
+    collaboration: any[];
+  }>({
+    alignment: [],
+    trends: [],
+    geographic: { userBrandLocation: null, locationData: [] },
+    collaboration: []
+  });
+  const [chartLoading, setChartLoading] = useState(false);
 
   const handleSynergyTrigger = async () => {
     try {
@@ -87,6 +103,7 @@ export default function BrandAnalysis() {
     
     if (id) {
       fetchBrandData();
+      fetchChartData();
       // Auto-trigger brand discovery if no existing analysis
       checkAndTriggerBrandDiscovery();
     }
@@ -272,6 +289,53 @@ export default function BrandAnalysis() {
       }
     } catch (error) {
       console.error('Error fetching location insights:', error);
+    }
+  };
+
+  const fetchChartData = async () => {
+    if (!id || !user) return;
+
+    setChartLoading(true);
+    try {
+      // Fetch all chart types in parallel
+      const chartTypes = ['alignment', 'trends', 'geographic', 'collaboration'];
+      const chartPromises = chartTypes.map(async (chartType) => {
+        const { data, error } = await supabase.functions.invoke('generate-chart-data', {
+          body: {
+            brandProfileId: id,
+            chartType,
+            timeRange: 'month'
+          }
+        });
+
+        if (error) {
+          console.error(`Error fetching ${chartType} chart data:`, error);
+          return { chartType, data: null };
+        }
+
+        return { chartType, data: data.data };
+      });
+
+      const results = await Promise.all(chartPromises);
+      
+      const newChartData = {
+        alignment: [],
+        trends: [],
+        geographic: { userBrandLocation: null, locationData: [] },
+        collaboration: []
+      };
+
+      results.forEach(({ chartType, data }) => {
+        if (data) {
+          newChartData[chartType as keyof typeof newChartData] = data;
+        }
+      });
+
+      setChartData(newChartData);
+    } catch (error) {
+      console.error('Error fetching chart data:', error);
+    } finally {
+      setChartLoading(false);
     }
   };
 
@@ -615,24 +679,69 @@ export default function BrandAnalysis() {
       )}
 
       {/* Advanced Analysis Tabs */}
-      <Tabs defaultValue="qloo" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="qloo">Qloo Brand Analysis</TabsTrigger>
-          <TabsTrigger value="synergy">Brand Synergy Analysis</TabsTrigger>
+      <Tabs defaultValue="analytics" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="analytics">Analytics Dashboard</TabsTrigger>
+          <TabsTrigger value="trends">Trends & Location</TabsTrigger>
+          <TabsTrigger value="qloo">Qloo Analysis</TabsTrigger>
+          <TabsTrigger value="synergy">Synergy Analysis</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="analytics" className="mt-6">
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <BrandAlignmentChart
+                data={chartData.alignment}
+                isLoading={chartLoading}
+                brandName={brandProfile?.brand_name || ''}
+              />
+              <CollaborationMatrix
+                data={chartData.collaboration}
+                isLoading={chartLoading}
+                onBrandSelect={(brandName) => {
+                  // Find brand in table and highlight it
+                  console.log('Selected brand:', brandName);
+                }}
+              />
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="trends" className="mt-6">
+          <div className="space-y-6">
+            <TrendAnalyticsDashboard
+              trendData={chartData.trends}
+              isLoading={chartLoading}
+              brandName={brandProfile?.brand_name || ''}
+            />
+            <GeographicBrandMap
+              locationData={chartData.geographic.locationData}
+              isLoading={chartLoading}
+              userBrandLocation={chartData.geographic.userBrandLocation}
+            />
+          </div>
+        </TabsContent>
+
         <TabsContent value="qloo" className="mt-6">
           <QlooAnalysis
             brandProfileId={brandProfile.id}
             brandName={brandProfile.brand_name}
-            onAnalysisUpdate={fetchBrandData}
+            onAnalysisUpdate={() => {
+              fetchBrandData();
+              fetchChartData();
+            }}
             onSynergyTrigger={handleSynergyTrigger}
           />
         </TabsContent>
+
         <TabsContent value="synergy" className="mt-6">
           <BrandSynergyAnalysis
             brandProfileId={brandProfile.id}
             brandName={brandProfile.brand_name}
-            onAnalysisUpdate={fetchBrandData}
+            onAnalysisUpdate={() => {
+              fetchBrandData();
+              fetchChartData();
+            }}
           />
         </TabsContent>
       </Tabs>
