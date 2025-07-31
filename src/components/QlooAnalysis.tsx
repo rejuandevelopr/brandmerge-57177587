@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { AlertTriangle, RefreshCw, CheckCircle, Clock, TrendingUp } from 'lucide-react';
+import { AlertTriangle, RefreshCw, CheckCircle, Clock, TrendingUp, Target } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -12,6 +12,7 @@ interface SimilarBrand {
   name: string;
   overlapScore: number;
   category?: string;
+  growthForecast?: string;
 }
 
 interface QlooAnalysisData {
@@ -258,21 +259,37 @@ export default function QlooAnalysis({ brandProfileId, brandName, onAnalysisUpda
 
             <div className="grid gap-3">
               {analysisData.similar_brands.map((brand, index) => (
-                <div key={index} className="flex items-center justify-between p-3 rounded-lg border bg-card/50">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h5 className="font-semibold">{brand.name}</h5>
-                      {brand.category && (
-                        <Badge variant="secondary" className="text-xs">
-                          {brand.category}
-                        </Badge>
-                      )}
+                <div key={index} className="p-4 rounded-lg border bg-card/50 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h5 className="font-semibold">{brand.name}</h5>
+                        {brand.category && (
+                          <Badge variant="secondary" className="text-xs">
+                            {brand.category}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-primary">{brand.overlapScore}%</div>
+                      <div className="text-xs text-muted-foreground">alignment</div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-lg font-bold text-primary">{brand.overlapScore}%</div>
-                    <div className="text-xs text-muted-foreground">alignment</div>
-                  </div>
+                  
+                  {brand.growthForecast && (
+                    <div className="border-t pt-3">
+                      <div className="flex items-start gap-2">
+                        <Target className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <div className="text-sm font-medium text-green-700 mb-1">Growth Opportunity Forecast</div>
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {brand.growthForecast}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

@@ -322,6 +322,7 @@ export type Database = {
           analysis_timestamp: string
           brand_profile_id: string
           error_message: string | null
+          growth_opportunity_forecasts: Json | null
           id: string
           last_updated: string
           overlap_scores: Json | null
@@ -332,6 +333,7 @@ export type Database = {
           analysis_timestamp?: string
           brand_profile_id: string
           error_message?: string | null
+          growth_opportunity_forecasts?: Json | null
           id?: string
           last_updated?: string
           overlap_scores?: Json | null
@@ -342,6 +344,7 @@ export type Database = {
           analysis_timestamp?: string
           brand_profile_id?: string
           error_message?: string | null
+          growth_opportunity_forecasts?: Json | null
           id?: string
           last_updated?: string
           overlap_scores?: Json | null
