@@ -256,25 +256,156 @@ Find brands that ${brandProfile.brand_name} would genuinely want to partner with
 }
 
 function determineMatchType(brand: DiscoveredBrand, brandProfile: any): string {
-  // Determine match type based on brand characteristics
+  // Determine match type based on brand characteristics with hierarchical location matching
   
-  // Check for location match first (more flexible matching)
-  const brandLocation = (brand.location || '').toLowerCase();
-  const profileCountry = (brandProfile.country || '').toLowerCase();
-  const profileCity = (brandProfile.city_region || '').toLowerCase();
+  const brandLocation = (brand.location || '').toLowerCase().trim();
+  const profileCountry = (brandProfile.country || '').toLowerCase().trim();
+  const profileCity = (brandProfile.city_region || '').toLowerCase().trim();
   
-  // Flexible location matching
+  // Enhanced location matching with hierarchical priority
   if (brandLocation && (profileCountry || profileCity)) {
-    // Check if brand location contains profile location parts
-    if (profileCity && brandLocation.includes(profileCity)) {
-      return 'location_based';
+    
+    // 1. CITY LEVEL MATCHING (Highest Priority)
+    if (profileCity) {
+      // Direct city match
+      if (brandLocation.includes(profileCity)) {
+        return 'location_based';
+      }
+      
+      // NYC metropolitan area matching
+      const nycKeywords = ['new york', 'nyc', 'manhattan', 'brooklyn', 'queens', 'bronx', 'staten island'];
+      const isProfileNYC = nycKeywords.some(keyword => profileCity.includes(keyword));
+      const isBrandNYC = nycKeywords.some(keyword => brandLocation.includes(keyword));
+      if (isProfileNYC && isBrandNYC) {
+        return 'location_based';
+      }
+      
+      // LA metropolitan area matching
+      const laKeywords = ['los angeles', 'la', 'hollywood', 'beverly hills', 'santa monica', 'west hollywood'];
+      const isProfileLA = laKeywords.some(keyword => profileCity.includes(keyword));
+      const isBrandLA = laKeywords.some(keyword => brandLocation.includes(keyword));
+      if (isProfileLA && isBrandLA) {
+        return 'location_based';
+      }
     }
-    if (profileCountry && (
-      brandLocation.includes(profileCountry) ||
-      (profileCountry === 'united states' && brandLocation.includes('usa')) ||
-      (profileCountry === 'usa' && brandLocation.includes('united states'))
-    )) {
-      return 'location_based';
+    
+    // 2. STATE/PROVINCE MATCHING (Medium Priority)
+    const stateAbbreviations = {
+      'new york': ['ny', 'new york'],
+      'california': ['ca', 'calif', 'california'],
+      'texas': ['tx', 'texas'],
+      'florida': ['fl', 'florida'],
+      'illinois': ['il', 'illinois'],
+      'pennsylvania': ['pa', 'penn', 'pennsylvania'],
+      'ohio': ['oh', 'ohio'],
+      'georgia': ['ga', 'georgia'],
+      'north carolina': ['nc', 'north carolina'],
+      'michigan': ['mi', 'michigan'],
+      'new jersey': ['nj', 'new jersey'],
+      'virginia': ['va', 'virginia'],
+      'washington': ['wa', 'washington'],
+      'arizona': ['az', 'arizona'],
+      'massachusetts': ['ma', 'mass', 'massachusetts'],
+      'indiana': ['in', 'indiana'],
+      'tennessee': ['tn', 'tenn', 'tennessee'],
+      'missouri': ['mo', 'missouri'],
+      'maryland': ['md', 'maryland'],
+      'wisconsin': ['wi', 'wisconsin'],
+      'colorado': ['co', 'colorado'],
+      'minnesota': ['mn', 'minnesota'],
+      'south carolina': ['sc', 'south carolina'],
+      'alabama': ['al', 'alabama'],
+      'louisiana': ['la', 'louisiana'],
+      'kentucky': ['ky', 'kentucky'],
+      'oregon': ['or', 'oregon'],
+      'oklahoma': ['ok', 'oklahoma'],
+      'connecticut': ['ct', 'conn', 'connecticut'],
+      'utah': ['ut', 'utah'],
+      'iowa': ['ia', 'iowa'],
+      'nevada': ['nv', 'nevada'],
+      'arkansas': ['ar', 'arkansas'],
+      'mississippi': ['ms', 'mississippi'],
+      'kansas': ['ks', 'kansas'],
+      'new mexico': ['nm', 'new mexico'],
+      'nebraska': ['ne', 'nebraska'],
+      'west virginia': ['wv', 'west virginia'],
+      'idaho': ['id', 'idaho'],
+      'hawaii': ['hi', 'hawaii'],
+      'new hampshire': ['nh', 'new hampshire'],
+      'maine': ['me', 'maine'],
+      'montana': ['mt', 'montana'],
+      'rhode island': ['ri', 'rhode island'],
+      'delaware': ['de', 'delaware'],
+      'south dakota': ['sd', 'south dakota'],
+      'north dakota': ['nd', 'north dakota'],
+      'alaska': ['ak', 'alaska'],
+      'vermont': ['vt', 'vermont'],
+      'wyoming': ['wy', 'wyoming']
+    };
+    
+    // Check if locations are in the same state
+    for (const [fullState, variations] of Object.entries(stateAbbreviations)) {
+      const profileInState = variations.some(variation => 
+        profileCity.includes(variation) || profileCountry.includes(variation)
+      );
+      const brandInState = variations.some(variation => brandLocation.includes(variation));
+      
+      if (profileInState && brandInState) {
+        return 'location_based';
+      }
+    }
+    
+    // 3. REGIONAL MATCHING (Lower Priority)
+    const regions = {
+      'east_coast': ['new york', 'massachusetts', 'connecticut', 'rhode island', 'maine', 'new hampshire', 'vermont', 'new jersey', 'pennsylvania', 'delaware', 'maryland', 'virginia', 'north carolina', 'south carolina', 'georgia', 'florida'],
+      'west_coast': ['california', 'oregon', 'washington', 'alaska', 'hawaii'],
+      'midwest': ['illinois', 'indiana', 'iowa', 'kansas', 'michigan', 'minnesota', 'missouri', 'nebraska', 'north dakota', 'ohio', 'south dakota', 'wisconsin'],
+      'southwest': ['arizona', 'new mexico', 'texas', 'oklahoma', 'nevada', 'utah', 'colorado'],
+      'southeast': ['alabama', 'arkansas', 'florida', 'georgia', 'kentucky', 'louisiana', 'mississippi', 'north carolina', 'south carolina', 'tennessee', 'virginia', 'west virginia']
+    };
+    
+    for (const [regionName, states] of Object.entries(regions)) {
+      const profileInRegion = states.some(state => 
+        profileCity.includes(state) || profileCountry.includes(state) || brandLocation.includes(state)
+      );
+      const brandInRegion = states.some(state => brandLocation.includes(state));
+      
+      if (profileInRegion && brandInRegion) {
+        return 'location_based';
+      }
+    }
+    
+    // 4. COUNTRY MATCHING (Lowest Priority)
+    if (profileCountry) {
+      const countryVariations = {
+        'united states': ['usa', 'us', 'america', 'united states', 'u.s.', 'u.s.a.'],
+        'canada': ['canada', 'ca'],
+        'united kingdom': ['uk', 'britain', 'england', 'scotland', 'wales', 'united kingdom', 'great britain'],
+        'australia': ['australia', 'au', 'aussie'],
+        'germany': ['germany', 'deutschland', 'de'],
+        'france': ['france', 'fr'],
+        'japan': ['japan', 'jp'],
+        'china': ['china', 'cn'],
+        'india': ['india', 'in'],
+        'brazil': ['brazil', 'brasil', 'br'],
+        'mexico': ['mexico', 'mx'],
+        'spain': ['spain', 'españa', 'es'],
+        'italy': ['italy', 'italia', 'it'],
+        'netherlands': ['netherlands', 'holland', 'nl'],
+        'sweden': ['sweden', 'se'],
+        'norway': ['norway', 'no'],
+        'denmark': ['denmark', 'dk'],
+        'finland': ['finland', 'fi']
+      };
+      
+      for (const [country, variations] of Object.entries(countryVariations)) {
+        const profileInCountry = variations.some(variation => profileCountry.includes(variation));
+        const brandInCountry = variations.some(variation => brandLocation.includes(variation));
+        
+        if (profileInCountry && brandInCountry) {
+          return 'location_based';
+        }
+      }
     }
   }
   
