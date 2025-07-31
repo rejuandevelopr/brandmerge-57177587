@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { BrandTable } from '@/components/BrandTable';
+import Navbar from '@/components/Navbar';
 
 interface BrandProfile {
   id: string;
@@ -65,23 +65,10 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="h-16 border-b border-border bg-background/80 backdrop-blur-lg">
-        <div className="container mx-auto px-4 flex items-center justify-between h-full">
-          <div>
-            <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
-            <p className="text-sm text-muted-foreground">Welcome back, {user?.email}</p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" onClick={handleSignOut}>
-              Sign Out
-            </Button>
-          </div>
-        </div>
-      </header>
-
+      <Navbar />
+      
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 space-y-6">
+      <main className="container mx-auto px-4 py-8 space-y-6 pt-24">
         <BrandTable 
           brandProfiles={brandProfiles} 
           loading={loading}
