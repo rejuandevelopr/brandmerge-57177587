@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus } from 'lucide-react';
-import QlooAnalysis from '@/components/QlooAnalysis';
-import TrendingOpportunities from '@/components/TrendingOpportunities';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { DashboardSidebar } from '@/components/DashboardSidebar';
+import { BrandTable } from '@/components/BrandTable';
 
 interface BrandProfile {
   id: string;
@@ -67,102 +66,41 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-background/80 backdrop-blur-lg">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div 
-            className="flex items-center space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={() => navigate('/')}
-          >
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold">B</span>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-background">
+        <DashboardSidebar />
+        
+        <div className="flex-1 flex flex-col">
+          {/* Header */}
+          <header className="h-16 border-b border-border bg-background/80 backdrop-blur-lg flex items-center justify-between px-6">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger />
+              <div>
+                <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
+                <p className="text-sm text-muted-foreground">Welcome back, {user?.email}</p>
+              </div>
             </div>
-            <span className="text-xl font-bold text-foreground">BrandMerge</span>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" onClick={() => navigate('/discovery')}>
-              Discover Brands
-            </Button>
-            <span className="text-muted-foreground">Welcome, {user?.email}</span>
-            <Button variant="ghost" onClick={handleSignOut}>
-              Sign Out
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Your Brand Profiles</h1>
-            <p className="text-muted-foreground">
-              Manage your brand profiles and discover collaboration opportunities
-            </p>
-          </div>
-          <Button onClick={() => navigate('/brand-builder')}>
-            <Plus className="w-4 h-4 mr-2" />
-            Create Brand Profile
-          </Button>
-        </div>
-
-        {/* Brand Profiles Grid */}
-        {brandProfiles.length === 0 ? (
-          <Card className="text-center py-12">
-            <CardContent>
-              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                <Plus className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">No brand profiles yet</h3>
-              <p className="text-muted-foreground mb-4">
-                Create your first brand profile to start connecting with other brands
-              </p>
-              <Button onClick={() => navigate('/brand-builder')}>
-                Create Your First Brand Profile
+            <div className="flex items-center space-x-4">
+              <Button variant="ghost" onClick={() => navigate('/discovery')}>
+                Discover Brands
               </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {brandProfiles.map((profile) => (
-              <div key={profile.id} className="space-y-6">
-                <Card className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <CardTitle className="text-xl">{profile.brand_name}</CardTitle>
-                    <CardDescription>{profile.industry}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground line-clamp-3">
-                      {profile.mission_statement}
-                    </p>
-                    <div className="mt-4 pt-4 border-t border-border">
-                      <p className="text-xs text-muted-foreground">
-                        Created {new Date(profile.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <QlooAnalysis 
-                  brandProfileId={profile.id}
-                  brandName={profile.brand_name}
-                  onAnalysisUpdate={fetchBrandProfiles}
-                />
-                
-                  <TrendingOpportunities 
-                    brandProfileId={profile.id}
-                    brandName={profile.brand_name}
-                    brandIndustry={profile.industry}
-                    brandCountry={profile.country}
-                    brandCity={profile.city_region}
-                  />
-              </div>
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
+              <Button variant="ghost" onClick={handleSignOut}>
+                Sign Out
+              </Button>
+            </div>
+          </header>
+
+          {/* Main Content */}
+          <main className="flex-1 p-6 overflow-auto">
+            <BrandTable 
+              brandProfiles={brandProfiles}
+              loading={loading}
+              onRefresh={fetchBrandProfiles}
+            />
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
   );
 };
 
