@@ -23,49 +23,39 @@ const Index = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="pt-24 px-6 py-20 text-center relative overflow-hidden bg-white">
-        {/* Gradient Overlays */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div 
-            className="absolute inset-0"
-            style={{
-              background: 'radial-gradient(70.71% 70.71% at 50% 50%, #000 0%, #000 20%, rgba(0, 0, 0, 0.00) 75%)'
-            }}
-          />
-          <div 
-            className="absolute top-20 left-1/4 w-96 h-96 rounded-full"
-            style={{
-              background: 'rgba(74, 196, 84, 0.09)',
-              filter: 'blur(50px)'
-            }}
-          />
-          <div 
-            className="absolute top-32 right-1/4 w-80 h-80 rounded-full"
-            style={{
-              background: 'rgba(103, 132, 239, 0.11)',
-              filter: 'blur(50px)'
-            }}
-          />
-        </div>
+      <section className="pt-24 px-6 py-20 text-center relative overflow-hidden" style={{background: 'linear-gradient(111.6deg, rgb(114, 167, 232) 9.4%, rgb(253, 129, 82) 43.9%, rgb(253, 129, 82) 54.8%, rgb(249, 202, 86) 86.3%)'}}>
         <div className="container mx-auto max-w-5xl relative z-10">
-          <div className="text-center mb-16">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-heading font-bold mb-8 leading-tight text-foreground max-w-4xl mx-auto">
-              Secure. Smart. Scalable.
-            </h1>
-            
-            <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed font-body">
-              BrandMerge is the fit-for-purpose AI platform for building robust, data-driven brand partnerships.
-            </p>
-            
-            <div className="flex justify-center mb-16">
-              <Button 
-                size="lg" 
-                className="text-lg px-8 py-4 font-body font-medium rounded-lg"
-                onClick={handleGetStarted}
-              >
-                Start building for free →
-              </Button>
-            </div>
+          <div className="text-center mb-8">
+            <span className="text-sm text-white/80 tracking-wider uppercase font-body">
+              YOUR ALL-IN-ONE AI COLLABORATION PLATFORM
+            </span>
+          </div>
+          
+          <h1 className="text-5xl md:text-7xl font-heading font-bold mb-8 leading-tight text-white">
+            Find Your Perfect Brand
+            <br />
+            Collab Partner
+          </h1>
+          
+          <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed font-body">
+            We analyze cultural overlaps to connect your brand with ideal partners based on shared audience taste, powered by AI & culture insights.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Button 
+              size="lg" 
+              className="text-lg px-8 py-6 bg-white text-primary hover:bg-white/90 hover:scale-105 transition-all duration-300 font-body font-medium"
+              onClick={handleGetStarted}
+            >
+              Get Started
+            </Button>
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="text-lg px-8 py-6 border-white/30 bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm font-body"
+            >
+              Watch Demo
+            </Button>
           </div>
         </div>
       </section>
