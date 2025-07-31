@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import QlooAnalysis from "@/components/QlooAnalysis";
@@ -31,6 +32,8 @@ interface MatchedBrand {
   description: string;
   matchType: string;
   overlapScore: number;
+  culturalTasteMarkers?: string[];
+  collaborationInterests?: string[];
 }
 
 interface MatchAnalysis {
@@ -77,6 +80,8 @@ export default function BrandAnalysis() {
     
     if (id) {
       fetchBrandData();
+      // Auto-trigger brand discovery if no existing analysis
+      checkAndTriggerBrandDiscovery();
     }
   }, [id, user, navigate]);
 
@@ -136,14 +141,39 @@ export default function BrandAnalysis() {
     }
   };
 
-  const startAnalysis = async () => {
+  const checkAndTriggerBrandDiscovery = async () => {
+    if (!id) return;
+
+    // Check if we already have a recent analysis
+    const { data: existingAnalysis } = await supabase
+      .from('brand_match_analyses')
+      .select('id, created_at')
+      .eq('brand_profile_id', id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    // If no analysis or analysis is older than 24 hours, trigger new discovery
+    if (!existingAnalysis || isAnalysisStale(existingAnalysis.created_at)) {
+      await startBrandDiscovery();
+    }
+  };
+
+  const isAnalysisStale = (createdAt: string): boolean => {
+    const analysisDate = new Date(createdAt);
+    const now = new Date();
+    const hoursDiff = (now.getTime() - analysisDate.getTime()) / (1000 * 60 * 60);
+    return hoursDiff > 24; // Consider stale after 24 hours
+  };
+
+  const startBrandDiscovery = async () => {
     if (!brandProfile) return;
 
     setAnalyzing(true);
     setAnalysisProgress(10);
 
     try {
-      const { data, error } = await supabase.functions.invoke('analyze-brand-matches', {
+      const { data, error } = await supabase.functions.invoke('discover-aligned-brands', {
         body: { brandProfileId: brandProfile.id }
       });
 
@@ -153,9 +183,13 @@ export default function BrandAnalysis() {
       pollAnalysisProgress();
       
     } catch (error) {
-      console.error('Error starting analysis:', error);
+      console.error('Error starting brand discovery:', error);
       setAnalyzing(false);
     }
+  };
+
+  const startAnalysis = async () => {
+    await startBrandDiscovery();
   };
 
   const pollAnalysisProgress = () => {
@@ -249,10 +283,16 @@ export default function BrandAnalysis() {
           </div>
         </div>
         <div className="flex space-x-2">
-          {!matchAnalysis && !analyzing && (
-            <Button onClick={startAnalysis} className="flex items-center space-x-2">
+          {analyzing && (
+            <Button disabled className="flex items-center space-x-2">
+              <Search className="h-4 w-4 animate-spin" />
+              <span>Discovering Brands...</span>
+            </Button>
+          )}
+          {!analyzing && (
+            <Button onClick={startAnalysis} variant="outline" className="flex items-center space-x-2">
               <Search className="h-4 w-4" />
-              <span>Start Brand Analysis</span>
+              <span>Refresh Discovery</span>
             </Button>
           )}
         </div>
@@ -267,16 +307,16 @@ export default function BrandAnalysis() {
               <span>Analysis in Progress</span>
             </CardTitle>
             <CardDescription>
-              Searching for matching brands and analyzing partnerships...
+              Discovering aligned brands using AI-powered cultural and audience analysis...
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Progress value={analysisProgress} className="w-full" />
             <p className="text-sm text-muted-foreground mt-2">
-              {analysisProgress < 30 && "Initializing analysis..."}
-              {analysisProgress >= 30 && analysisProgress < 60 && "Searching for matching brands..."}
-              {analysisProgress >= 60 && analysisProgress < 90 && "Analyzing brand compatibility..."}
-              {analysisProgress >= 90 && "Finalizing results..."}
+              {analysisProgress < 30 && "Initializing brand discovery..."}
+              {analysisProgress >= 30 && analysisProgress < 60 && "AI analyzing cultural alignment..."}
+              {analysisProgress >= 60 && analysisProgress < 90 && "Finding partnership opportunities..."}
+              {analysisProgress >= 90 && "Finalizing brand matches..."}
             </p>
           </CardContent>
         </Card>
@@ -347,16 +387,16 @@ export default function BrandAnalysis() {
         </CardContent>
       </Card>
 
-      {/* Google-Sourced Brand Matches */}
+      {/* AI-Discovered Brand Matches */}
       {matchAnalysis && matchAnalysis.matched_brands && matchAnalysis.matched_brands.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Users className="h-5 w-5" />
-              <span>Discovered Brand Matches ({matchAnalysis.match_count})</span>
+              <span>Top 10-15 Aligned Brands ({matchAnalysis.match_count})</span>
             </CardTitle>
             <CardDescription>
-              Real brands found through intelligent search analysis
+              AI-discovered brands with cultural and audience alignment potential
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -366,8 +406,9 @@ export default function BrandAnalysis() {
                   <TableHead>Brand Name</TableHead>
                   <TableHead>Industry</TableHead>
                   <TableHead>Location</TableHead>
-                  <TableHead>Match Type</TableHead>
-                  <TableHead>Overlap Score</TableHead>
+                  <TableHead>Cultural Taste Markers</TableHead>
+                  <TableHead>Collaboration Interests</TableHead>
+                  <TableHead>Qloo Overlap %</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -385,12 +426,22 @@ export default function BrandAnalysis() {
                     <TableCell>{brand.industry}</TableCell>
                     <TableCell>{brand.location}</TableCell>
                     <TableCell>
-                      <Badge 
-                        variant="secondary" 
-                        className={getMatchTypeColor(brand.matchType)}
-                      >
-                        {getMatchTypeLabel(brand.matchType)}
-                      </Badge>
+                      <div className="flex flex-wrap gap-1">
+                        {(brand.culturalTasteMarkers || []).slice(0, 3).map((marker, idx) => (
+                          <Badge key={idx} variant="outline" className="text-xs">
+                            {marker}
+                          </Badge>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {(brand.collaborationInterests || []).slice(0, 2).map((interest, idx) => (
+                          <Badge key={idx} variant="secondary" className="text-xs">
+                            {interest}
+                          </Badge>
+                        ))}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2">
@@ -408,9 +459,16 @@ export default function BrandAnalysis() {
                             size="sm"
                             onClick={() => window.open(brand.website, '_blank')}
                           >
-                            <ExternalLink className="h-3 w-3" />
+                            View
                           </Button>
                         )}
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => {/* TODO: Implement connection request */}}
+                        >
+                          Connect
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -421,20 +479,28 @@ export default function BrandAnalysis() {
         </Card>
       )}
 
-      {/* Qloo Analysis */}
-      <QlooAnalysis
-        brandProfileId={brandProfile.id}
-        brandName={brandProfile.brand_name}
-        onAnalysisUpdate={fetchBrandData}
-        onSynergyTrigger={handleSynergyTrigger}
-      />
-
-      {/* Brand Synergy Analysis */}
-      <BrandSynergyAnalysis
-        brandProfileId={brandProfile.id}
-        brandName={brandProfile.brand_name}
-        onAnalysisUpdate={fetchBrandData}
-      />
+      {/* Advanced Analysis Tabs */}
+      <Tabs defaultValue="qloo" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="qloo">Qloo Brand Analysis</TabsTrigger>
+          <TabsTrigger value="synergy">Brand Synergy Analysis</TabsTrigger>
+        </TabsList>
+        <TabsContent value="qloo" className="mt-6">
+          <QlooAnalysis
+            brandProfileId={brandProfile.id}
+            brandName={brandProfile.brand_name}
+            onAnalysisUpdate={fetchBrandData}
+            onSynergyTrigger={handleSynergyTrigger}
+          />
+        </TabsContent>
+        <TabsContent value="synergy" className="mt-6">
+          <BrandSynergyAnalysis
+            brandProfileId={brandProfile.id}
+            brandName={brandProfile.brand_name}
+            onAnalysisUpdate={fetchBrandData}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
