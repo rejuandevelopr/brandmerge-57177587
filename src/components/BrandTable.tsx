@@ -249,12 +249,11 @@ export function BrandTable({ brandProfiles, loading, onRefresh }: BrandTableProp
                         View Details
                       </Button>
                       <Button
-                        variant="outline"
                         size="sm"
-                        onClick={() => navigate('/discovery')}
+                        onClick={() => navigate(`/brand-analysis/${brand.id}`)}
                       >
                         <TrendingUp className="w-4 h-4 mr-1" />
-                        Discover
+                        Analyze Brand
                       </Button>
                     </div>
                   </TableCell>

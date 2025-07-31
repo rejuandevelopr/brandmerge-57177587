@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import BrandBuilder from "./pages/BrandBuilder";
 import Discovery from "./pages/Discovery";
 import BrandProfile from "./pages/BrandProfile";
+import BrandAnalysis from "./pages/BrandAnalysis";
 import Connections from "./pages/Connections";
 import Chat from "./pages/Chat";
 import NotFound from "./pages/NotFound";
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/connections" element={<Connections />} />
             <Route path="/chat/:connectionId" element={<Chat />} />
             <Route path="/brand-profile/:id" element={<BrandProfile />} />
+            <Route path="/brand-analysis/:id" element={<BrandAnalysis />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

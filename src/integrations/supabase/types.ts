@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      brand_analysis_sessions: {
+        Row: {
+          brand_profile_id: string
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          match_analysis_id: string | null
+          qloo_analysis_id: string | null
+          session_status: string
+          started_at: string
+          synergy_analysis_count: number | null
+          updated_at: string
+        }
+        Insert: {
+          brand_profile_id: string
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          match_analysis_id?: string | null
+          qloo_analysis_id?: string | null
+          session_status?: string
+          started_at?: string
+          synergy_analysis_count?: number | null
+          updated_at?: string
+        }
+        Update: {
+          brand_profile_id?: string
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          match_analysis_id?: string | null
+          qloo_analysis_id?: string | null
+          session_status?: string
+          started_at?: string
+          synergy_analysis_count?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       brand_connections: {
         Row: {
           created_at: string
@@ -58,6 +100,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      brand_match_analyses: {
+        Row: {
+          analysis_status: string
+          brand_profile_id: string
+          created_at: string
+          id: string
+          industry_filter: string | null
+          location_filter: string | null
+          match_count: number | null
+          matched_brands: Json
+          search_query: string
+          search_timestamp: string
+          updated_at: string
+        }
+        Insert: {
+          analysis_status?: string
+          brand_profile_id: string
+          created_at?: string
+          id?: string
+          industry_filter?: string | null
+          location_filter?: string | null
+          match_count?: number | null
+          matched_brands?: Json
+          search_query: string
+          search_timestamp?: string
+          updated_at?: string
+        }
+        Update: {
+          analysis_status?: string
+          brand_profile_id?: string
+          created_at?: string
+          id?: string
+          industry_filter?: string | null
+          location_filter?: string | null
+          match_count?: number | null
+          matched_brands?: Json
+          search_query?: string
+          search_timestamp?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       brand_profiles: {
         Row: {
