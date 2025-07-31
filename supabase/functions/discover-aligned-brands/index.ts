@@ -9,7 +9,6 @@ const corsHeaders = {
 
 interface BrandDiscoveryRequest {
   brandProfileId: string;
-  brandCount?: number;
 }
 
 interface DiscoveredBrand {
@@ -43,7 +42,7 @@ serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const { brandProfileId, brandCount = 15 } = await req.json() as BrandDiscoveryRequest;
+    const { brandProfileId } = await req.json() as BrandDiscoveryRequest;
 
     console.log(`Starting ChatGPT brand discovery for brand profile: ${brandProfileId}`);
 
@@ -73,7 +72,7 @@ serve(async (req) => {
     }
 
     // Use ChatGPT to discover aligned brands
-    const discoveredBrands = await discoverBrandsWithChatGPT(brandProfile, openaiApiKey, brandCount);
+    const discoveredBrands = await discoverBrandsWithChatGPT(brandProfile, openaiApiKey);
 
     // Store results in database
     const { error: insertError } = await supabase
@@ -96,8 +95,7 @@ serve(async (req) => {
         analysis_status: 'completed',
         match_count: discoveredBrands.length,
         location_filter: brandProfile.country || brandProfile.city_region,
-        industry_filter: brandProfile.industry,
-        brand_count_requested: brandCount
+        industry_filter: brandProfile.industry
       });
 
     if (insertError) {
@@ -138,12 +136,12 @@ serve(async (req) => {
   }
 });
 
-async function discoverBrandsWithChatGPT(brandProfile: any, openaiApiKey: string, brandCount: number = 15): Promise<DiscoveredBrand[]> {
+async function discoverBrandsWithChatGPT(brandProfile: any, openaiApiKey: string): Promise<DiscoveredBrand[]> {
   const culturalMarkers = brandProfile.cultural_taste_markers?.join(', ') || '';
   const collaborationInterests = brandProfile.collaboration_interests?.join(', ') || '';
   const location = brandProfile.country || brandProfile.city_region || '';
 
-  const prompt = `Find ${brandCount} real brands that could partner with "${brandProfile.brand_name}".
+  const prompt = `Find 15 real brands that could partner with "${brandProfile.brand_name}".
 
 TARGET BRAND PROFILE:
 - Name: ${brandProfile.brand_name}
@@ -177,7 +175,7 @@ Return ONLY a valid JSON array with this exact structure:
   }
 ]
 
-Return exactly ${brandCount} brands as a valid JSON array.`;
+Return exactly 15 brands as a valid JSON array.`;
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
