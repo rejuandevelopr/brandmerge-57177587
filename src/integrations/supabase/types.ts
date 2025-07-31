@@ -300,6 +300,39 @@ export type Database = {
           },
         ]
       }
+      data_refresh_log: {
+        Row: {
+          error_message: string | null
+          id: string
+          last_refresh: string
+          results_count: number | null
+          search_query: string | null
+          source_type: string
+          status: string | null
+          success_rate: number | null
+        }
+        Insert: {
+          error_message?: string | null
+          id?: string
+          last_refresh?: string
+          results_count?: number | null
+          search_query?: string | null
+          source_type: string
+          status?: string | null
+          success_rate?: number | null
+        }
+        Update: {
+          error_message?: string | null
+          id?: string
+          last_refresh?: string
+          results_count?: number | null
+          search_query?: string | null
+          source_type?: string
+          status?: string | null
+          success_rate?: number | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           content: string
@@ -348,6 +381,51 @@ export type Database = {
           },
         ]
       }
+      partnership_news: {
+        Row: {
+          announcement_date: string | null
+          brand_1: string
+          brand_2: string
+          collaboration_type: string | null
+          created_at: string
+          id: string
+          industry_tags: string[] | null
+          relevance_score: number | null
+          source_url: string | null
+          success_indicators: Json | null
+          summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          announcement_date?: string | null
+          brand_1: string
+          brand_2: string
+          collaboration_type?: string | null
+          created_at?: string
+          id?: string
+          industry_tags?: string[] | null
+          relevance_score?: number | null
+          source_url?: string | null
+          success_indicators?: Json | null
+          summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          announcement_date?: string | null
+          brand_1?: string
+          brand_2?: string
+          collaboration_type?: string | null
+          created_at?: string
+          id?: string
+          industry_tags?: string[] | null
+          relevance_score?: number | null
+          source_url?: string | null
+          success_indicators?: Json | null
+          summary?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -372,6 +450,57 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      trending_startups: {
+        Row: {
+          company_name: string
+          cultural_markers: string[] | null
+          description: string | null
+          discovered_at: string
+          funding_status: string | null
+          growth_indicators: Json | null
+          id: string
+          industry: string | null
+          is_active: boolean | null
+          last_updated: string
+          opportunity_score: number | null
+          partnership_signals: Json | null
+          qloo_alignment_score: number | null
+          source_url: string | null
+        }
+        Insert: {
+          company_name: string
+          cultural_markers?: string[] | null
+          description?: string | null
+          discovered_at?: string
+          funding_status?: string | null
+          growth_indicators?: Json | null
+          id?: string
+          industry?: string | null
+          is_active?: boolean | null
+          last_updated?: string
+          opportunity_score?: number | null
+          partnership_signals?: Json | null
+          qloo_alignment_score?: number | null
+          source_url?: string | null
+        }
+        Update: {
+          company_name?: string
+          cultural_markers?: string[] | null
+          description?: string | null
+          discovered_at?: string
+          funding_status?: string | null
+          growth_indicators?: Json | null
+          id?: string
+          industry?: string | null
+          is_active?: boolean | null
+          last_updated?: string
+          opportunity_score?: number | null
+          partnership_signals?: Json | null
+          qloo_alignment_score?: number | null
+          source_url?: string | null
         }
         Relationships: []
       }
