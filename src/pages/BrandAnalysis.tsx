@@ -556,13 +556,6 @@ export default function BrandAnalysis() {
                             View
                           </Button>
                         )}
-                        <Button
-                          variant="default"
-                          size="sm"
-                          onClick={() => {/* TODO: Implement connection request */}}
-                        >
-                          Connect
-                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
