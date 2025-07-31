@@ -422,8 +422,13 @@ export default function BrandAnalysis() {
                   <TableRow key={index}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">
-                          {brand.name}
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{brand.name}</span>
+                          {brand.matchType === 'location_based' && (
+                            <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 text-xs">
+                              Location matched
+                            </Badge>
+                          )}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {brand.description}

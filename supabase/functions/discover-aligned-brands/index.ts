@@ -257,12 +257,29 @@ Find brands that ${brandProfile.brand_name} would genuinely want to partner with
 
 function determineMatchType(brand: DiscoveredBrand, brandProfile: any): string {
   // Determine match type based on brand characteristics
-  if (brand.industry === brandProfile.industry) {
-    return 'industry_similar';
+  
+  // Check for location match first (more flexible matching)
+  const brandLocation = (brand.location || '').toLowerCase();
+  const profileCountry = (brandProfile.country || '').toLowerCase();
+  const profileCity = (brandProfile.city_region || '').toLowerCase();
+  
+  // Flexible location matching
+  if (brandLocation && (profileCountry || profileCity)) {
+    // Check if brand location contains profile location parts
+    if (profileCity && brandLocation.includes(profileCity)) {
+      return 'location_based';
+    }
+    if (profileCountry && (
+      brandLocation.includes(profileCountry) ||
+      (profileCountry === 'united states' && brandLocation.includes('usa')) ||
+      (profileCountry === 'usa' && brandLocation.includes('united states'))
+    )) {
+      return 'location_based';
+    }
   }
   
-  if (brand.location === (brandProfile.country || brandProfile.city_region)) {
-    return 'location_based';
+  if (brand.industry === brandProfile.industry) {
+    return 'industry_similar';
   }
   
   // Check for cultural alignment
