@@ -36,12 +36,6 @@ const Navbar = () => {
             {user ? (
               <>
                 <Link 
-                  to="/discovery" 
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Discover Brands
-                </Link>
-                <Link 
                   to="/connections" 
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >

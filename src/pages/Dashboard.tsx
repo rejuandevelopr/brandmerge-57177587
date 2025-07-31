@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { DashboardSidebar } from '@/components/DashboardSidebar';
 import { BrandTable } from '@/components/BrandTable';
 
 interface BrandProfile {
@@ -66,42 +64,30 @@ const Dashboard = () => {
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
-        <DashboardSidebar />
-        
-        <div className="flex-1 flex flex-col">
-          {/* Header */}
-          <header className="h-16 border-b border-border bg-background/80 backdrop-blur-lg flex items-center justify-between px-6">
-            <div className="flex items-center gap-4">
-              <SidebarTrigger />
-              <div>
-                <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
-                <p className="text-sm text-muted-foreground">Welcome back, {user?.email}</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" onClick={() => navigate('/discovery')}>
-                Discover Brands
-              </Button>
-              <Button variant="ghost" onClick={handleSignOut}>
-                Sign Out
-              </Button>
-            </div>
-          </header>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="h-16 border-b border-border bg-background/80 backdrop-blur-lg flex items-center justify-between px-6">
+        <div>
+          <h1 className="text-xl font-semibold text-foreground">Dashboard</h1>
+          <p className="text-sm text-muted-foreground">Welcome back, {user?.email}</p>
+        </div>
+        <div className="flex items-center space-x-4">
+          <Button variant="ghost" onClick={handleSignOut}>
+            Sign Out
+          </Button>
+        </div>
+      </header>
 
-          {/* Main Content */}
-          <main className="flex-1 p-6 overflow-auto">
+      {/* Main Content */}
+      <main className="p-6">
         <BrandTable 
           brandProfiles={brandProfiles} 
           loading={loading}
           onRefresh={fetchBrandProfiles}
           onBrandDeleted={fetchBrandProfiles}
         />
-          </main>
-        </div>
-      </div>
-    </SidebarProvider>
+      </main>
+    </div>
   );
 };
 
