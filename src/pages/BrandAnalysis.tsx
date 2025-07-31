@@ -34,6 +34,9 @@ interface MatchedBrand {
   overlapScore: number;
   culturalTasteMarkers?: string[];
   collaborationInterests?: string[];
+  culturalAlignScore: number;
+  collaborationPossibility: 'High' | 'Medium' | 'Low';
+  collaborationDescription: string;
 }
 
 interface MatchAnalysis {
@@ -403,13 +406,13 @@ export default function BrandAnalysis() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Brand Name</TableHead>
-                  <TableHead>Industry</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Cultural Taste Markers</TableHead>
-                  <TableHead>Collaboration Interests</TableHead>
-                  <TableHead>Qloo Overlap %</TableHead>
-                  <TableHead>Actions</TableHead>
+                      <TableHead>Brand Name</TableHead>
+                      <TableHead>Industry</TableHead>
+                      <TableHead>Location</TableHead>
+                      <TableHead>Cultural Align %</TableHead>
+                      <TableHead>Collaboration Possibilities</TableHead>
+                      <TableHead>Qloo Overlap %</TableHead>
+                      <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -426,29 +429,41 @@ export default function BrandAnalysis() {
                     <TableCell>{brand.industry}</TableCell>
                     <TableCell>{brand.location}</TableCell>
                     <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {(brand.culturalTasteMarkers || []).slice(0, 3).map((marker, idx) => (
-                          <Badge key={idx} variant="outline" className="text-xs">
-                            {marker}
-                          </Badge>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {(brand.collaborationInterests || []).slice(0, 2).map((interest, idx) => (
-                          <Badge key={idx} variant="secondary" className="text-xs">
-                            {interest}
-                          </Badge>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Progress value={brand.overlapScore * 100} className="w-16" />
-                        <span className="text-sm font-medium">
-                          {(brand.overlapScore * 100).toFixed(0)}%
+                      <div className="flex items-center gap-2">
+                        <Progress 
+                          value={brand.culturalAlignScore || Math.round(brand.overlapScore * 100)} 
+                          className="w-16 h-2" 
+                        />
+                        <span className="text-sm font-medium min-w-[3rem]">
+                          {brand.culturalAlignScore || Math.round(brand.overlapScore * 100)}%
                         </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Badge 
+                          variant={
+                            brand.collaborationPossibility === 'High' ? 'default' :
+                            brand.collaborationPossibility === 'Medium' ? 'secondary' : 'outline'
+                          }
+                          className={
+                            brand.collaborationPossibility === 'High' ? 'bg-green-100 text-green-800 border-green-200' :
+                            brand.collaborationPossibility === 'Medium' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                            'bg-gray-100 text-gray-600 border-gray-200'
+                          }
+                        >
+                          {brand.collaborationPossibility || 'Medium'}
+                        </Badge>
+                        <div className="text-xs text-muted-foreground max-w-[200px] truncate">
+                          {brand.collaborationDescription || 'Open to partnerships'}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <div className="text-sm font-medium">
+                          {Math.round(brand.overlapScore * 100)}%
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>

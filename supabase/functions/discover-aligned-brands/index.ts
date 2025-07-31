@@ -21,6 +21,9 @@ interface DiscoveredBrand {
   description: string;
   matchScore: number;
   sourceUrl?: string;
+  culturalAlignScore: number;
+  collaborationPossibility: 'High' | 'Medium' | 'Low';
+  collaborationDescription: string;
 }
 
 serve(async (req) => {
@@ -84,7 +87,10 @@ serve(async (req) => {
           website: brand.website || '',
           description: brand.description,
           matchType: determineMatchType(brand, brandProfile),
-          overlapScore: brand.matchScore / 100
+          overlapScore: brand.matchScore / 100,
+          culturalAlignScore: brand.culturalAlignScore,
+          collaborationPossibility: brand.collaborationPossibility,
+          collaborationDescription: brand.collaborationDescription
         })),
         analysis_status: 'completed',
         match_count: discoveredBrands.length,
@@ -169,7 +175,10 @@ REQUIRED OUTPUT: Return a valid JSON array with exactly this structure:
     "website": "https://website.com (if found)",
     "description": "Brief description of what they do and why they align",
     "matchScore": 85,
-    "sourceUrl": "Source where you found this info (if applicable)"
+    "sourceUrl": "Source where you found this info (if applicable)",
+    "culturalAlignScore": 85,
+    "collaborationPossibility": "High",
+    "collaborationDescription": "Recently funded Series A, actively seeking brand partnerships"
   }
 ]
 
@@ -224,7 +233,12 @@ Find brands that ${brandProfile.brand_name} would genuinely want to partner with
           brand.description && 
           typeof brand.matchScore === 'number' &&
           brand.matchScore >= 40
-        );
+        ).map((brand: any) => ({
+          ...brand,
+          culturalAlignScore: brand.culturalAlignScore || brand.matchScore,
+          collaborationPossibility: brand.collaborationPossibility || determineCollaborationLevel(brand),
+          collaborationDescription: brand.collaborationDescription || generateCollaborationDescription(brand)
+        }));
         
         return Array.isArray(validBrands) ? validBrands : [];
       } catch (parseError) {
@@ -266,4 +280,44 @@ function determineMatchType(brand: DiscoveredBrand, brandProfile: any): string {
   }
   
   return 'partnership_opportunity';
+}
+
+function determineCollaborationLevel(brand: any): 'High' | 'Medium' | 'Low' {
+  const description = brand.description?.toLowerCase() || '';
+  
+  // High collaboration potential indicators
+  if (description.includes('seeking partnerships') || 
+      description.includes('recently funded') ||
+      description.includes('series a') ||
+      description.includes('open to collaborations')) {
+    return 'High';
+  }
+  
+  // Medium collaboration potential indicators
+  if (description.includes('partnerships') || 
+      description.includes('collaborations') ||
+      description.includes('established') ||
+      brand.matchScore > 70) {
+    return 'Medium';
+  }
+  
+  return 'Low';
+}
+
+function generateCollaborationDescription(brand: any): string {
+  const level = brand.collaborationPossibility || determineCollaborationLevel(brand);
+  const description = brand.description?.toLowerCase() || '';
+  
+  if (level === 'High') {
+    if (description.includes('funded')) return 'Recently funded, actively seeking partnerships';
+    if (description.includes('growing')) return 'High growth potential, open to collaborations';
+    return 'Active partnership seeker';
+  }
+  
+  if (level === 'Medium') {
+    if (description.includes('established')) return 'Established brand, selective partnerships';
+    return 'Open to strategic partnerships';
+  }
+  
+  return 'Limited collaboration indicators';
 }
