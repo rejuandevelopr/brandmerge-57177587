@@ -151,14 +151,18 @@ export default function BrandAnalysis() {
     // Check if we already have a recent analysis
     const { data: existingAnalysis } = await supabase
       .from('brand_match_analyses')
-      .select('id, created_at')
+      .select('id, created_at, matched_brands')
       .eq('brand_profile_id', id)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    // If no analysis or analysis is older than 24 hours, trigger new discovery
-    if (!existingAnalysis || isAnalysisStale(existingAnalysis.created_at)) {
+    // Check if analysis needs refresh due to being stale or having incorrect location badges
+    const needsRefresh = !existingAnalysis || 
+                        isAnalysisStale(existingAnalysis.created_at) ||
+                        hasIncorrectLocationBadges(existingAnalysis.matched_brands);
+
+    if (needsRefresh) {
       await startBrandDiscovery();
     }
   };
@@ -167,7 +171,42 @@ export default function BrandAnalysis() {
     const analysisDate = new Date(createdAt);
     const now = new Date();
     const hoursDiff = (now.getTime() - analysisDate.getTime()) / (1000 * 60 * 60);
-    return hoursDiff > 24; // Consider stale after 24 hours
+    return hoursDiff > 1; // Consider stale after 1 hour to force refresh with new logic
+  };
+
+  const hasIncorrectLocationBadges = (matchedBrands: any): boolean => {
+    if (!brandProfile || !matchedBrands) return false;
+    
+    // Handle Supabase JSON type - convert to array if needed
+    const brandsArray = Array.isArray(matchedBrands) ? matchedBrands : [];
+    if (brandsArray.length === 0) return false;
+    
+    const targetLocation = brandProfile.city_region?.toLowerCase() || '';
+    const targetCountry = brandProfile.country?.toLowerCase() || '';
+    
+    // Check if any brand has location_based match type but different city
+    return brandsArray.some((brand: any) => {
+      if (brand.matchType !== 'location_based') return false;
+      
+      const brandLocation = brand.location?.toLowerCase() || '';
+      
+      // Extract city from brand location (format: "City, Country" or "City, State, Country")
+      const brandParts = brandLocation.split(',').map(part => part.trim());
+      const brandCity = brandParts[0] || '';
+      const brandCountry = brandParts[brandParts.length - 1] || '';
+      
+      // If countries are different, this is definitely incorrect
+      if (brandCountry && targetCountry && !brandCountry.includes(targetCountry) && !targetCountry.includes(brandCountry)) {
+        return true;
+      }
+      
+      // If cities are different and both exist, this is likely incorrect
+      if (brandCity && targetLocation && !brandCity.includes(targetLocation) && !targetLocation.includes(brandCity)) {
+        return true;
+      }
+      
+      return false;
+    });
   };
 
   const startBrandDiscovery = async () => {
