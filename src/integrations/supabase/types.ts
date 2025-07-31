@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      brand_analysis_history: {
+        Row: {
+          analysis_data: Json
+          analysis_timestamp: string
+          analysis_type: string
+          brand_profile_id: string
+          created_at: string
+          id: string
+          match_count: number | null
+          overlap_scores: Json | null
+        }
+        Insert: {
+          analysis_data: Json
+          analysis_timestamp?: string
+          analysis_type: string
+          brand_profile_id: string
+          created_at?: string
+          id?: string
+          match_count?: number | null
+          overlap_scores?: Json | null
+        }
+        Update: {
+          analysis_data?: Json
+          analysis_timestamp?: string
+          analysis_type?: string
+          brand_profile_id?: string
+          created_at?: string
+          id?: string
+          match_count?: number | null
+          overlap_scores?: Json | null
+        }
+        Relationships: []
+      }
       brand_analysis_sessions: {
         Row: {
           brand_profile_id: string
@@ -101,44 +134,98 @@ export type Database = {
           },
         ]
       }
+      brand_location_insights: {
+        Row: {
+          brand_profile_id: string
+          collaboration_potential: string | null
+          created_at: string
+          distance_km: number | null
+          id: string
+          local_opportunities: Json | null
+          location_relevance_score: number | null
+          matched_brand_name: string
+          same_city: boolean | null
+          same_country: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          brand_profile_id: string
+          collaboration_potential?: string | null
+          created_at?: string
+          distance_km?: number | null
+          id?: string
+          local_opportunities?: Json | null
+          location_relevance_score?: number | null
+          matched_brand_name: string
+          same_city?: boolean | null
+          same_country?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          brand_profile_id?: string
+          collaboration_potential?: string | null
+          created_at?: string
+          distance_km?: number | null
+          id?: string
+          local_opportunities?: Json | null
+          location_relevance_score?: number | null
+          matched_brand_name?: string
+          same_city?: boolean | null
+          same_country?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       brand_match_analyses: {
         Row: {
+          analysis_staleness_hours: number | null
           analysis_status: string
           brand_profile_id: string
           created_at: string
+          geo_priority_score: number | null
           id: string
           industry_filter: string | null
           location_filter: string | null
+          location_relevance_score: number | null
           match_count: number | null
           matched_brands: Json
           search_query: string
           search_timestamp: string
+          trend_direction: string | null
           updated_at: string
         }
         Insert: {
+          analysis_staleness_hours?: number | null
           analysis_status?: string
           brand_profile_id: string
           created_at?: string
+          geo_priority_score?: number | null
           id?: string
           industry_filter?: string | null
           location_filter?: string | null
+          location_relevance_score?: number | null
           match_count?: number | null
           matched_brands?: Json
           search_query: string
           search_timestamp?: string
+          trend_direction?: string | null
           updated_at?: string
         }
         Update: {
+          analysis_staleness_hours?: number | null
           analysis_status?: string
           brand_profile_id?: string
           created_at?: string
+          geo_priority_score?: number | null
           id?: string
           industry_filter?: string | null
           location_filter?: string | null
+          location_relevance_score?: number | null
           match_count?: number | null
           matched_brands?: Json
           search_query?: string
           search_timestamp?: string
+          trend_direction?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -160,10 +247,14 @@ export type Database = {
           industry: string | null
           last_gpt_sync: string | null
           last_qloo_sync: string | null
+          latitude: number | null
+          longitude: number | null
+          market_region: string | null
           mission_statement: string | null
           niche_interests: string[] | null
           physical_address: string | null
           qloo_analysis_status: string | null
+          timezone: string | null
           updated_at: string
           user_id: string
           website_url: string | null
@@ -184,10 +275,14 @@ export type Database = {
           industry?: string | null
           last_gpt_sync?: string | null
           last_qloo_sync?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          market_region?: string | null
           mission_statement?: string | null
           niche_interests?: string[] | null
           physical_address?: string | null
           qloo_analysis_status?: string | null
+          timezone?: string | null
           updated_at?: string
           user_id: string
           website_url?: string | null
@@ -208,10 +303,14 @@ export type Database = {
           industry?: string | null
           last_gpt_sync?: string | null
           last_qloo_sync?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          market_region?: string | null
           mission_statement?: string | null
           niche_interests?: string[] | null
           physical_address?: string | null
           qloo_analysis_status?: string | null
+          timezone?: string | null
           updated_at?: string
           user_id?: string
           website_url?: string | null
@@ -304,6 +403,42 @@ export type Database = {
           qloo_overlap_score?: number | null
           synergy_summary?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      brand_trend_analytics: {
+        Row: {
+          brand_profile_id: string
+          created_at: string
+          current_score: number | null
+          id: string
+          matched_brand_name: string
+          previous_score: number | null
+          trend_analysis_date: string
+          trend_direction: string
+          trend_percentage: number | null
+        }
+        Insert: {
+          brand_profile_id: string
+          created_at?: string
+          current_score?: number | null
+          id?: string
+          matched_brand_name: string
+          previous_score?: number | null
+          trend_analysis_date?: string
+          trend_direction?: string
+          trend_percentage?: number | null
+        }
+        Update: {
+          brand_profile_id?: string
+          created_at?: string
+          current_score?: number | null
+          id?: string
+          matched_brand_name?: string
+          previous_score?: number | null
+          trend_analysis_date?: string
+          trend_direction?: string
+          trend_percentage?: number | null
         }
         Relationships: []
       }
@@ -614,7 +749,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_distance: {
+        Args: { lat1: number; lon1: number; lat2: number; lon2: number }
+        Returns: number
+      }
+      calculate_trend_direction: {
+        Args: { previous_score: number; current_score: number }
+        Returns: string
+      }
     }
     Enums: {
       collaboration_type:
