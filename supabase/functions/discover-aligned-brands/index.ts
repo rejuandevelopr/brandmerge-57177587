@@ -9,6 +9,7 @@ const corsHeaders = {
 
 interface BrandDiscoveryRequest {
   brandProfileId: string;
+  brandCount?: number;
 }
 
 interface DiscoveredBrand {
@@ -42,7 +43,7 @@ serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const { brandProfileId } = await req.json() as BrandDiscoveryRequest;
+    const { brandProfileId, brandCount = 15 } = await req.json() as BrandDiscoveryRequest;
 
     console.log(`Starting ChatGPT brand discovery for brand profile: ${brandProfileId}`);
 
@@ -72,7 +73,7 @@ serve(async (req) => {
     }
 
     // Use ChatGPT to discover aligned brands
-    const discoveredBrands = await discoverBrandsWithChatGPT(brandProfile, openaiApiKey);
+    const discoveredBrands = await discoverBrandsWithChatGPT(brandProfile, openaiApiKey, brandCount);
 
     // Store results in database
     const { error: insertError } = await supabase
@@ -95,7 +96,8 @@ serve(async (req) => {
         analysis_status: 'completed',
         match_count: discoveredBrands.length,
         location_filter: brandProfile.country || brandProfile.city_region,
-        industry_filter: brandProfile.industry
+        industry_filter: brandProfile.industry,
+        brand_count_requested: brandCount
       });
 
     if (insertError) {
@@ -136,7 +138,7 @@ serve(async (req) => {
   }
 });
 
-async function discoverBrandsWithChatGPT(brandProfile: any, openaiApiKey: string): Promise<DiscoveredBrand[]> {
+async function discoverBrandsWithChatGPT(brandProfile: any, openaiApiKey: string, brandCount: number = 15): Promise<DiscoveredBrand[]> {
   const culturalMarkers = brandProfile.cultural_taste_markers?.join(', ') || '';
   const collaborationInterests = brandProfile.collaboration_interests?.join(', ') || '';
   const location = brandProfile.country || brandProfile.city_region || '';
@@ -179,18 +181,21 @@ Collaboration Interests: ${collaborationInterests}
 CRITICAL GEOGRAPHIC PRIORITY INSTRUCTION:
 This analysis must prioritize LOCAL and REGIONAL brand partnerships for practical collaboration opportunities.
 
-TIERED DISCOVERY STRATEGY - Find brands in this exact order:
-1. TIER 1 (6-8 brands): Same city/metropolitan area as ${locationContext}
-   - Focus on brands physically located in or near ${city || location}
-   - These enable in-person collaborations, local events, shared logistics
+TIERED DISCOVERY STRATEGY - Find exactly ${brandCount} brands in this exact order:
+${brandCount <= 15 ? `
+1. TIER 1 (${Math.round(brandCount * 0.67)} brands): Same city/metropolitan area as ${locationContext}
+2. TIER 2 (${Math.round(brandCount * 0.33)} brands): Same country/region (${country})
+` : brandCount <= 25 ? `
+1. TIER 1 (${Math.round(brandCount * 0.6)} brands): Same city/metropolitan area as ${locationContext}
+2. TIER 2 (${Math.round(brandCount * 0.4)} brands): Same country/region (${country})
+` : `
+1. TIER 1 (${Math.round(brandCount * 0.57)} brands): Same city/metropolitan area as ${locationContext}
+2. TIER 2 (${Math.round(brandCount * 0.43)} brands): Same country/region (${country})
+`}
+   - Local brands enable in-person collaborations, events, shared logistics
    - Search specifically for: "${city} brands", "local ${city} companies", "${city} startups"
-
-2. TIER 2 (2-3 brands): Same country/region (${country})
-   - Brands elsewhere in ${country} with strong cultural alignment
-   - Consider brands that could expand to ${city} or vice versa
-
-3. TIER 3 (2-3 brands): International brands with exceptional cultural alignment
-   - Only include if cultural alignment score is 85+ and clear partnership history
+   - National brands provide expansion opportunities within ${country}
+   - Prioritize brands that could expand to ${city} or vice versa
 
 SEARCH CRITERIA (in priority order):
 1. GEOGRAPHIC PROXIMITY: Prioritize brands within 50 miles of ${city || location}
@@ -229,7 +234,10 @@ SCORING GUIDELINES:
 - International brands: Maximum score 85, only if exceptional alignment
 
 IMPORTANT RULES:
-- 60% of results MUST be from ${locationContext}
+- Return EXACTLY ${brandCount} brands, no more, no less
+${brandCount <= 15 ? `- 67% of results MUST be from ${locationContext}, 33% from ${country}` : 
+  brandCount <= 25 ? `- 60% of results MUST be from ${locationContext}, 40% from ${country}` :
+  `- 57% of results MUST be from ${locationContext}, 43% from ${country}`}
 - Only include REAL, existing brands you can find information about
 - Be specific about exact locations (include city, state/province, country)
 - Emphasize LOCAL collaboration opportunities in descriptions

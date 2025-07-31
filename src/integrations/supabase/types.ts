@@ -180,9 +180,11 @@ export type Database = {
         Row: {
           analysis_staleness_hours: number | null
           analysis_status: string
+          brand_count_requested: number | null
           brand_profile_id: string
           created_at: string
           geo_priority_score: number | null
+          geographic_distribution: Json | null
           id: string
           industry_filter: string | null
           location_filter: string | null
@@ -197,9 +199,11 @@ export type Database = {
         Insert: {
           analysis_staleness_hours?: number | null
           analysis_status?: string
+          brand_count_requested?: number | null
           brand_profile_id: string
           created_at?: string
           geo_priority_score?: number | null
+          geographic_distribution?: Json | null
           id?: string
           industry_filter?: string | null
           location_filter?: string | null
@@ -214,9 +218,11 @@ export type Database = {
         Update: {
           analysis_staleness_hours?: number | null
           analysis_status?: string
+          brand_count_requested?: number | null
           brand_profile_id?: string
           created_at?: string
           geo_priority_score?: number | null
+          geographic_distribution?: Json | null
           id?: string
           industry_filter?: string | null
           location_filter?: string | null

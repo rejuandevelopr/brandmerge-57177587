@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import QlooAnalysis from "@/components/QlooAnalysis";
@@ -64,6 +65,7 @@ export default function BrandAnalysis() {
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
+  const [selectedBrandCount, setSelectedBrandCount] = useState<string>("10-15");
 
   const handleSynergyTrigger = async () => {
     try {
@@ -216,8 +218,19 @@ export default function BrandAnalysis() {
     setAnalysisProgress(10);
 
     try {
+      // Convert selected brand count to number for backend
+      const brandCountMap = {
+        "10-15": 15,
+        "20-25": 25,
+        "30-35": 35
+      };
+      const brandCount = brandCountMap[selectedBrandCount as keyof typeof brandCountMap];
+
       const { data, error } = await supabase.functions.invoke('discover-aligned-brands', {
-        body: { brandProfileId: brandProfile.id }
+        body: { 
+          brandProfileId: brandProfile.id,
+          brandCount: brandCount
+        }
       });
 
       if (error) throw error;
@@ -326,17 +339,39 @@ export default function BrandAnalysis() {
             </p>
           </div>
         </div>
-        <div className="flex space-x-2">
-          {analyzing && (
-            <Button disabled className="flex items-center space-x-2">
-              <Search className="h-4 w-4 animate-spin" />
-              <span>Discovering Brands...</span>
-            </Button>
+        <div className="flex items-center space-x-3">
+          {!analyzing && (
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium">Brands to discover:</span>
+              <Select value={selectedBrandCount} onValueChange={setSelectedBrandCount}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10-15">10-15</SelectItem>
+                  <SelectItem value="20-25">20-25</SelectItem>
+                  <SelectItem value="30-35">30-35</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           )}
+          
+          {analyzing && (
+            <div className="flex items-center space-x-2">
+              <Badge variant="default" className="bg-blue-100 text-blue-800">
+                Active
+              </Badge>
+              <Button disabled className="flex items-center space-x-2">
+                <Search className="h-4 w-4 animate-spin" />
+                <span>Discovering Brands...</span>
+              </Button>
+            </div>
+          )}
+          
           {!analyzing && (
             <Button onClick={startAnalysis} variant="outline" className="flex items-center space-x-2">
               <Search className="h-4 w-4" />
-              <span>Refresh Discovery</span>
+              <span>Start Discovery</span>
             </Button>
           )}
         </div>
@@ -431,6 +466,27 @@ export default function BrandAnalysis() {
         </CardContent>
       </Card>
 
+      {/* Analysis Status */}
+      {!analyzing && matchAnalysis && (
+        <Card>
+          <CardContent className="py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Badge variant="default" className="bg-green-100 text-green-800">
+                  Active
+                </Badge>
+                <span className="text-sm text-muted-foreground">
+                  Discovery completed • {matchAnalysis.match_count} brands found
+                </span>
+              </div>
+              <span className="text-xs text-muted-foreground">
+                Last updated: {new Date(matchAnalysis.search_timestamp).toLocaleDateString()}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* AI-Discovered Brand Matches */}
       {matchAnalysis && matchAnalysis.matched_brands && matchAnalysis.matched_brands.length > 0 && (
         <Card>
@@ -440,7 +496,7 @@ export default function BrandAnalysis() {
               <span>AI-Discovered Aligned Brands ({matchAnalysis.match_count})</span>
             </CardTitle>
             <CardDescription>
-              AI-powered cultural alignment analysis
+              AI-powered cultural alignment analysis with geographic distribution
             </CardDescription>
           </CardHeader>
           <CardContent>
