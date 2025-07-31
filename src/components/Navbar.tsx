@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleAuthClick = () => {
     if (user) {
@@ -58,9 +59,15 @@ const Navbar = () => {
                 <span className="text-muted-foreground hidden md:block">
                   Welcome, {user.email?.split('@')[0]}
                 </span>
-                <Button variant="ghost" onClick={() => navigate('/')}>
-                  Home
-                </Button>
+                {location.pathname === '/' ? (
+                  <Button variant="ghost" onClick={() => navigate('/dashboard')}>
+                    Dashboard
+                  </Button>
+                ) : (
+                  <Button variant="ghost" onClick={() => navigate('/')}>
+                    Home
+                  </Button>
+                )}
                 <Button variant="ghost" onClick={handleSignOut}>
                   Sign Out
                 </Button>
