@@ -92,11 +92,12 @@ const Dashboard = () => {
 
           {/* Main Content */}
           <main className="flex-1 p-6 overflow-auto">
-            <BrandTable 
-              brandProfiles={brandProfiles}
-              loading={loading}
-              onRefresh={fetchBrandProfiles}
-            />
+        <BrandTable 
+          brandProfiles={brandProfiles} 
+          loading={loading}
+          onRefresh={fetchBrandProfiles}
+          onBrandDeleted={fetchBrandProfiles}
+        />
           </main>
         </div>
       </div>

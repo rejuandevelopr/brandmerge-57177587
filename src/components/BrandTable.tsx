@@ -29,7 +29,20 @@ import {
   Search,
   Filter,
   TrendingUp,
+  Trash2,
 } from 'lucide-react';
+import { useBrandDelete } from '@/hooks/useBrandDelete';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface BrandProfile {
   id: string;
@@ -49,13 +62,15 @@ interface BrandTableProps {
   brandProfiles: BrandProfile[];
   loading: boolean;
   onRefresh: () => void;
+  onBrandDeleted?: (brandId: string) => void;
 }
 
-export function BrandTable({ brandProfiles, loading, onRefresh }: BrandTableProps) {
+export function BrandTable({ brandProfiles, loading, onRefresh, onBrandDeleted }: BrandTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIndustry, setSelectedIndustry] = useState('');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
+  const { deleteBrandProfile, isDeleting } = useBrandDelete();
 
   const industries = [...new Set(brandProfiles.map(brand => brand.industry).filter(Boolean))];
 
@@ -75,6 +90,14 @@ export function BrandTable({ brandProfiles, loading, onRefresh }: BrandTableProp
       newExpanded.add(brandId);
     }
     setExpandedRows(newExpanded);
+  };
+
+  const handleDelete = async (brandId: string, brandName: string) => {
+    const success = await deleteBrandProfile(brandId);
+    if (success) {
+      onBrandDeleted?.(brandId);
+      onRefresh();
+    }
   };
 
   const getAnalysisStatus = (status?: string) => {
@@ -255,6 +278,35 @@ export function BrandTable({ brandProfiles, loading, onRefresh }: BrandTableProp
                         <TrendingUp className="w-4 h-4 mr-1" />
                         Analyze Brand
                       </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Brand Profile</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete "{brand.brand_name}"? This action cannot be undone and will permanently remove all associated data including analyses and connections.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDelete(brand.id, brand.brand_name)}
+                              disabled={isDeleting}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              {isDeleting ? 'Deleting...' : 'Delete'}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </TableCell>
                 </TableRow>

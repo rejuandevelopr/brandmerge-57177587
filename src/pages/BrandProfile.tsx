@@ -7,8 +7,20 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, MessageCircle, Users, Target, MapPin, Sparkles, Heart, ExternalLink } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Users, Target, MapPin, Sparkles, Heart, ExternalLink, Trash2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { useBrandDelete } from '@/hooks/useBrandDelete';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 interface BrandProfile {
   id: string;
@@ -42,6 +54,7 @@ const BrandProfile = () => {
   const [synergyAnalysis, setSynergyAnalysis] = useState<SynergyAnalysis[]>([]);
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);
+  const { deleteBrandProfile, isDeleting } = useBrandDelete();
 
   useEffect(() => {
     if (!user) {
@@ -110,6 +123,15 @@ const BrandProfile = () => {
     }, 1000);
   };
 
+  const handleDelete = async () => {
+    if (!brand || !id) return;
+    
+    const success = await deleteBrandProfile(id);
+    if (success) {
+      navigate('/dashboard');
+    }
+  };
+
   const getBannerGradient = (brandName: string) => {
     // Generate a consistent gradient based on brand name
     const colors = [
@@ -169,6 +191,35 @@ const BrandProfile = () => {
             <Button variant="ghost" onClick={() => navigate('/dashboard')}>
               My Dashboard
             </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Profile
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Brand Profile</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete "{brand?.brand_name}"? This action cannot be undone and will permanently remove:
+                    <br />• All brand analysis data
+                    <br />• Connection requests and conversations
+                    <br />• Collaboration insights
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {isDeleting ? 'Deleting...' : 'Delete Profile'}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </header>
