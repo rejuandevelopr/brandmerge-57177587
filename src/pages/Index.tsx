@@ -48,37 +48,24 @@ const Index = () => {
           />
         </div>
         <div className="container mx-auto max-w-5xl relative z-10">
-          <div className="text-center mb-8">
-            <span className="text-sm text-white/80 tracking-wider uppercase font-body">
-              YOUR ALL-IN-ONE AI COLLABORATION PLATFORM
-            </span>
-          </div>
-          
-          <h1 className="text-5xl md:text-7xl font-heading font-bold mb-8 leading-tight text-foreground">
-            Find Your Perfect Brand
-            <br />
-            Collab Partner
-          </h1>
-          
-          <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed font-body">
-            We analyze cultural overlaps to connect your brand with ideal partners based on shared audience taste, powered by AI & culture insights.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button 
-              size="lg" 
-              className="text-lg px-8 py-6 hover:scale-105 transition-all duration-300 font-body font-medium"
-              onClick={handleGetStarted}
-            >
-              Get Started
-            </Button>
-            <Button 
-              variant="outline" 
-              size="lg" 
-              className="text-lg px-8 py-6 font-body"
-            >
-              Watch Demo
-            </Button>
+          <div className="text-center mb-16">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-heading font-bold mb-8 leading-tight text-foreground max-w-4xl mx-auto">
+              Secure. Smart. Scalable.
+            </h1>
+            
+            <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed font-body">
+              BrandMerge is the fit-for-purpose AI platform for building robust, data-driven brand partnerships.
+            </p>
+            
+            <div className="flex justify-center mb-16">
+              <Button 
+                size="lg" 
+                className="text-lg px-8 py-4 font-body font-medium rounded-lg"
+                onClick={handleGetStarted}
+              >
+                Start building for free →
+              </Button>
+            </div>
           </div>
         </div>
       </section>
