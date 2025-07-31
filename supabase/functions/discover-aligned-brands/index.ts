@@ -140,57 +140,102 @@ async function discoverBrandsWithChatGPT(brandProfile: any, openaiApiKey: string
   const culturalMarkers = brandProfile.cultural_taste_markers?.join(', ') || '';
   const collaborationInterests = brandProfile.collaboration_interests?.join(', ') || '';
   const location = brandProfile.country || brandProfile.city_region || '';
+  const city = brandProfile.city_region || '';
+  const country = brandProfile.country || '';
+
+  // Enhanced location context for geographic priority
+  const getLocationContext = (city: string, country: string): string => {
+    const metroAreas = {
+      'New York': 'New York metropolitan area including NYC, Brooklyn, Queens, Manhattan, and surrounding boroughs',
+      'Los Angeles': 'Greater Los Angeles area including LA, Hollywood, Santa Monica, Beverly Hills',
+      'San Francisco': 'San Francisco Bay Area including SF, Palo Alto, Oakland, San Jose',
+      'Chicago': 'Chicago metropolitan area including downtown Chicago and suburbs',
+      'Boston': 'Greater Boston area including Cambridge, Somerville',
+      'Seattle': 'Seattle metropolitan area including Bellevue, Redmond'
+    };
+    
+    for (const [metro, description] of Object.entries(metroAreas)) {
+      if (city.toLowerCase().includes(metro.toLowerCase())) {
+        return description;
+      }
+    }
+    
+    return `${city}, ${country} and surrounding metropolitan area`;
+  };
+
+  const locationContext = city && country ? getLocationContext(city, country) : location;
 
   const prompt = `
-You are an expert brand partnership analyst. Find 10-15 real brands that would align culturally and audience-wise with the target brand described below.
+You are an expert brand partnership analyst specializing in finding geographically strategic and culturally aligned brand partnerships.
 
 TARGET BRAND: "${brandProfile.brand_name}"
 Industry: ${brandProfile.industry}
 Location: ${location}
+Location Context: ${locationContext}
 Mission: ${brandProfile.mission_statement}
 Cultural Taste Markers: ${culturalMarkers}
 Collaboration Interests: ${collaborationInterests}
 
-TASK: Search the web and find 10-15 REAL brands that:
-1. Share similar cultural values or aesthetic
-2. Target similar audiences but aren't direct competitors
-3. Would be good candidates for partnerships, collaborations, or cross-promotion
-4. Have complementary rather than competing offerings
+CRITICAL GEOGRAPHIC PRIORITY INSTRUCTION:
+This analysis must prioritize LOCAL and REGIONAL brand partnerships for practical collaboration opportunities.
 
-SEARCH CRITERIA:
-- Look for brands with similar cultural positioning
-- Consider audience overlap potential
-- Focus on partnership-friendly companies
-- Include both established and emerging brands
-- Prioritize brands open to collaborations
+TIERED DISCOVERY STRATEGY - Find brands in this exact order:
+1. TIER 1 (6-8 brands): Same city/metropolitan area as ${locationContext}
+   - Focus on brands physically located in or near ${city || location}
+   - These enable in-person collaborations, local events, shared logistics
+   - Search specifically for: "${city} brands", "local ${city} companies", "${city} startups"
+
+2. TIER 2 (2-3 brands): Same country/region (${country})
+   - Brands elsewhere in ${country} with strong cultural alignment
+   - Consider brands that could expand to ${city} or vice versa
+
+3. TIER 3 (2-3 brands): International brands with exceptional cultural alignment
+   - Only include if cultural alignment score is 85+ and clear partnership history
+
+SEARCH CRITERIA (in priority order):
+1. GEOGRAPHIC PROXIMITY: Prioritize brands within 50 miles of ${city || location}
+2. Cultural values alignment and aesthetic similarity
+3. Target similar audiences but aren't direct competitors
+4. Partnership-friendly with history of collaborations
+5. Complementary rather than competing offerings
+
+LOCAL PARTNERSHIP FOCUS:
+- Look for brands that could share retail spaces, co-host events
+- Consider local supply chain and logistics advantages  
+- Focus on brands active in local business communities
+- Include emerging local brands alongside established ones
 
 REQUIRED OUTPUT: Return a valid JSON array with exactly this structure:
 [
   {
     "name": "Exact Brand Name",
-    "industry": "Specific Industry",
-    "location": "City, Country (if known)",
+    "industry": "Specific Industry", 
+    "location": "City, State/Province, Country (be specific)",
     "culturalTasteMarkers": ["marker1", "marker2", "marker3"],
     "collaborationInterests": ["partnership type1", "partnership type2"],
     "website": "https://website.com (if found)",
-    "description": "Brief description of what they do and why they align",
+    "description": "Brief description emphasizing why they're a good match AND their local presence",
     "matchScore": 85,
-    "sourceUrl": "Source where you found this info (if applicable)",
+    "sourceUrl": "Source where you found this info",
     "culturalAlignScore": 85,
     "collaborationPossibility": "High",
-    "collaborationDescription": "Recently funded Series A, actively seeking brand partnerships"
+    "collaborationDescription": "Local presence enables easy collaboration"
   }
 ]
 
-IMPORTANT RULES:
-- Only include REAL, existing brands you can find information about
-- Match score should be 40-95 based on alignment strength
-- Cultural taste markers should be relevant to the brand's positioning
-- Collaboration interests should be realistic based on their business model
-- Descriptions should explain WHY they're a good match
-- Prioritize quality matches over quantity
+SCORING GUIDELINES:
+- Local brands (same city): Base score 75-95
+- Regional brands (same country): Base score 65-85  
+- International brands: Maximum score 85, only if exceptional alignment
 
-Find brands that ${brandProfile.brand_name} would genuinely want to partner with.`;
+IMPORTANT RULES:
+- 60% of results MUST be from ${locationContext}
+- Only include REAL, existing brands you can find information about
+- Be specific about exact locations (include city, state/province, country)
+- Emphasize LOCAL collaboration opportunities in descriptions
+- Prioritize brands with physical presence that enables real-world partnerships
+
+Focus on brands that ${brandProfile.brand_name} could realistically partner with for local events, shared marketing, or regional expansion.`;
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -233,12 +278,29 @@ Find brands that ${brandProfile.brand_name} would genuinely want to partner with
           brand.description && 
           typeof brand.matchScore === 'number' &&
           brand.matchScore >= 40
-        ).map((brand: any) => ({
-          ...brand,
-          culturalAlignScore: brand.culturalAlignScore || brand.matchScore,
-          collaborationPossibility: brand.collaborationPossibility || determineCollaborationLevel(brand),
-          collaborationDescription: brand.collaborationDescription || generateCollaborationDescription(brand)
-        }));
+        ).map((brand: any) => {
+          // Apply geographic proximity scoring boost
+          const geographicBoost = calculateGeographicBoost(brand, brandProfile);
+          const adjustedMatchScore = Math.min(95, brand.matchScore + geographicBoost);
+          
+          return {
+            ...brand,
+            matchScore: adjustedMatchScore,
+            culturalAlignScore: brand.culturalAlignScore || brand.matchScore,
+            collaborationPossibility: brand.collaborationPossibility || determineCollaborationLevel(brand),
+            collaborationDescription: brand.collaborationDescription || generateCollaborationDescription(brand)
+          };
+        }).sort((a, b) => {
+          // Sort by geographic proximity first, then by match score
+          const aIsLocal = isLocalBrand(a, brandProfile);
+          const bIsLocal = isLocalBrand(b, brandProfile);
+          
+          if (aIsLocal && !bIsLocal) return -1;
+          if (!aIsLocal && bIsLocal) return 1;
+          
+          // If both are local or both are non-local, sort by match score
+          return b.matchScore - a.matchScore;
+        });
         
         return Array.isArray(validBrands) ? validBrands : [];
       } catch (parseError) {
@@ -387,4 +449,146 @@ function generateCollaborationDescription(brand: any): string {
   }
   
   return 'Limited collaboration indicators';
+}
+
+function calculateGeographicBoost(brand: any, brandProfile: any): number {
+  const brandLocation = (brand.location || '').toLowerCase().trim();
+  const profileCountry = (brandProfile.country || '').toLowerCase().trim();
+  const profileCity = (brandProfile.city_region || '').toLowerCase().trim();
+  
+  if (!brandLocation || (!profileCountry && !profileCity)) {
+    return 0; // No geographic boost if location data is missing
+  }
+  
+  // Parse brand location
+  const brandParts = brandLocation.split(',').map(part => part.trim());
+  const brandCity = brandParts[0] || '';
+  const brandCountry = brandParts.length > 1 ? brandParts[brandParts.length - 1] : '';
+  
+  // Normalize country names
+  const normalizeCountry = (country: string): string => {
+    return country
+      .replace(/\b(united states|usa|us|america|u\.s\.|u\.s\.a\.)\b/g, 'united states')
+      .replace(/\b(united kingdom|uk|britain|england|great britain)\b/g, 'united kingdom')
+      .replace(/\b(canada|ca)\b/g, 'canada')
+      .trim();
+  };
+  
+  const normalizedProfileCountry = normalizeCountry(profileCountry);
+  const normalizedBrandCountry = normalizeCountry(brandCountry);
+  
+  // Same city = +15 boost
+  if (profileCity && brandCity) {
+    const normalizeCity = (city: string): string => {
+      return city
+        .replace(/\b(new york|nyc|ny)\b/g, 'new york')
+        .replace(/\b(los angeles|la)\b/g, 'los angeles')
+        .replace(/\b(san francisco|sf)\b/g, 'san francisco')
+        .trim();
+    };
+    
+    const normalizedProfileCity = normalizeCity(profileCity);
+    const normalizedBrandCity = normalizeCity(brandCity);
+    
+    if (normalizedProfileCity === normalizedBrandCity) {
+      return 15; // Significant boost for same city
+    }
+  }
+  
+  // Metropolitan area = +10 boost
+  const metropolitanAreas = {
+    'new york': ['new york', 'nyc', 'manhattan', 'brooklyn', 'queens', 'bronx', 'staten island', 'new york city'],
+    'los angeles': ['los angeles', 'la', 'hollywood', 'beverly hills', 'santa monica', 'west hollywood', 'culver city', 'venice'],
+    'san francisco': ['san francisco', 'sf', 'palo alto', 'mountain view', 'oakland', 'berkeley'],
+    'boston': ['boston', 'cambridge', 'somerville', 'brookline'],
+    'chicago': ['chicago', 'evanston', 'oak park'],
+    'seattle': ['seattle', 'bellevue', 'redmond', 'kirkland']
+  };
+  
+  for (const [metro, areas] of Object.entries(metropolitanAreas)) {
+    const profileInMetro = areas.some(area => 
+      profileCity.includes(area) || brandLocation.includes(area)
+    );
+    const brandInMetro = areas.some(area => brandLocation.includes(area));
+    
+    if (profileInMetro && brandInMetro) {
+      return 10; // Good boost for same metro area
+    }
+  }
+  
+  // Same country = +5 boost
+  if (normalizedProfileCountry && normalizedBrandCountry && 
+      normalizedProfileCountry === normalizedBrandCountry) {
+    return 5; // Small boost for same country
+  }
+  
+  return 0; // No geographic boost
+}
+
+function isLocalBrand(brand: any, brandProfile: any): boolean {
+  const brandLocation = (brand.location || '').toLowerCase().trim();
+  const profileCountry = (brandProfile.country || '').toLowerCase().trim();
+  const profileCity = (brandProfile.city_region || '').toLowerCase().trim();
+  
+  if (!brandLocation || (!profileCountry && !profileCity)) {
+    return false;
+  }
+  
+  // Parse brand location
+  const brandParts = brandLocation.split(',').map(part => part.trim());
+  const brandCity = brandParts[0] || '';
+  const brandCountry = brandParts.length > 1 ? brandParts[brandParts.length - 1] : '';
+  
+  // Normalize country names
+  const normalizeCountry = (country: string): string => {
+    return country
+      .replace(/\b(united states|usa|us|america|u\.s\.|u\.s\.a\.)\b/g, 'united states')
+      .replace(/\b(united kingdom|uk|britain|england|great britain)\b/g, 'united kingdom')
+      .replace(/\b(canada|ca)\b/g, 'canada')
+      .trim();
+  };
+  
+  const normalizedProfileCountry = normalizeCountry(profileCountry);
+  const normalizedBrandCountry = normalizeCountry(brandCountry);
+  
+  // Check if same city or metro area
+  if (profileCity && brandCity) {
+    const normalizeCity = (city: string): string => {
+      return city
+        .replace(/\b(new york|nyc|ny)\b/g, 'new york')
+        .replace(/\b(los angeles|la)\b/g, 'los angeles')
+        .replace(/\b(san francisco|sf)\b/g, 'san francisco')
+        .trim();
+    };
+    
+    const normalizedProfileCity = normalizeCity(profileCity);
+    const normalizedBrandCity = normalizeCity(brandCity);
+    
+    if (normalizedProfileCity === normalizedBrandCity) {
+      return true; // Same city is local
+    }
+  }
+  
+  // Check metropolitan areas
+  const metropolitanAreas = {
+    'new york': ['new york', 'nyc', 'manhattan', 'brooklyn', 'queens', 'bronx', 'staten island', 'new york city'],
+    'los angeles': ['los angeles', 'la', 'hollywood', 'beverly hills', 'santa monica', 'west hollywood', 'culver city', 'venice'],
+    'san francisco': ['san francisco', 'sf', 'palo alto', 'mountain view', 'oakland', 'berkeley'],
+    'boston': ['boston', 'cambridge', 'somerville', 'brookline'],
+    'chicago': ['chicago', 'evanston', 'oak park'],
+    'seattle': ['seattle', 'bellevue', 'redmond', 'kirkland']
+  };
+  
+  for (const [metro, areas] of Object.entries(metropolitanAreas)) {
+    const profileInMetro = areas.some(area => 
+      profileCity.includes(area) || brandLocation.includes(area)
+    );
+    const brandInMetro = areas.some(area => brandLocation.includes(area));
+    
+    if (profileInMetro && brandInMetro) {
+      return true; // Same metro area is local
+    }
+  }
+  
+  return false; // Not local
 }
