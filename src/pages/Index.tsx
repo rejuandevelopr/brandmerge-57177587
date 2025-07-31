@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
@@ -234,14 +234,14 @@ const Index = () => {
           
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {/* Free Plan */}
-            <Card className="bg-card/50 backdrop-blur-sm border-border hover:bg-card/70 transition-all duration-300 hover:-translate-y-2">
+            <Card className="bg-card/50 backdrop-blur-sm border-border hover:bg-card/70 transition-all duration-300 hover:-translate-y-2 flex flex-col">
               <CardHeader className="text-center pb-6">
                 <Badge variant="secondary" className="mb-4 w-fit mx-auto">Starter</Badge>
                 <CardTitle className="text-2xl text-foreground mb-4">Free</CardTitle>
                 <div className="text-4xl font-bold text-foreground">$0</div>
                 <CardDescription className="text-muted-foreground">per month</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 flex-grow">
                 <div className="flex items-center gap-3">
                   <CheckCircle className="w-5 h-5 text-primary" />
                   <span className="text-muted-foreground">Up to 5 brand matches</span>
@@ -254,14 +254,16 @@ const Index = () => {
                   <CheckCircle className="w-5 h-5 text-primary" />
                   <span className="text-muted-foreground">Email support</span>
                 </div>
-                <Button variant="outline" className="w-full mt-6" onClick={handleGetStarted}>
+              </CardContent>
+              <CardFooter>
+                <Button variant="outline" className="w-full" onClick={handleGetStarted}>
                   Get Started
                 </Button>
-              </CardContent>
+              </CardFooter>
             </Card>
 
             {/* Pro Plan */}
-            <Card className="bg-card/50 backdrop-blur-sm border-primary/20 hover:bg-card/70 transition-all duration-300 hover:-translate-y-2 relative">
+            <Card className="bg-card/50 backdrop-blur-sm border-primary/20 hover:bg-card/70 transition-all duration-300 hover:-translate-y-2 relative flex flex-col">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                 <Badge className="bg-primary text-primary-foreground">Most Popular</Badge>
               </div>
@@ -271,7 +273,7 @@ const Index = () => {
                 <div className="text-4xl font-bold text-foreground">$49</div>
                 <CardDescription className="text-muted-foreground">per month</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 flex-grow">
                 <div className="flex items-center gap-3">
                   <CheckCircle className="w-5 h-5 text-primary" />
                   <span className="text-muted-foreground">Unlimited brand matches</span>
@@ -292,21 +294,23 @@ const Index = () => {
                   <CheckCircle className="w-5 h-5 text-primary" />
                   <span className="text-muted-foreground">Market intelligence reports</span>
                 </div>
-                <Button className="w-full mt-6 bg-primary hover:bg-primary/90 text-primary-foreground" onClick={handleGetStarted}>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" onClick={handleGetStarted}>
                   Start Free Trial
                 </Button>
-              </CardContent>
+              </CardFooter>
             </Card>
 
             {/* Enterprise Plan */}
-            <Card className="bg-card/50 backdrop-blur-sm border-border hover:bg-card/70 transition-all duration-300 hover:-translate-y-2">
+            <Card className="bg-card/50 backdrop-blur-sm border-border hover:bg-card/70 transition-all duration-300 hover:-translate-y-2 flex flex-col">
               <CardHeader className="text-center pb-6">
                 <Badge variant="secondary" className="mb-4 w-fit mx-auto">Enterprise</Badge>
                 <CardTitle className="text-2xl text-foreground mb-4">Enterprise</CardTitle>
                 <div className="text-4xl font-bold text-foreground">Custom</div>
                 <CardDescription className="text-muted-foreground">pricing</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 flex-grow">
                 <div className="flex items-center gap-3">
                   <CheckCircle className="w-5 h-5 text-primary" />
                   <span className="text-muted-foreground">Everything in Pro</span>
@@ -327,10 +331,12 @@ const Index = () => {
                   <CheckCircle className="w-5 h-5 text-primary" />
                   <span className="text-muted-foreground">SLA guarantee</span>
                 </div>
-                <Button variant="outline" className="w-full mt-6">
+              </CardContent>
+              <CardFooter>
+                <Button variant="outline" className="w-full">
                   Contact Sales
                 </Button>
-              </CardContent>
+              </CardFooter>
             </Card>
           </div>
         </div>
