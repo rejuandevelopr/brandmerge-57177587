@@ -11,8 +11,6 @@ import BrandBuilder from "./pages/BrandBuilder";
 import Discovery from "./pages/Discovery";
 import BrandProfile from "./pages/BrandProfile";
 import BrandAnalysis from "./pages/BrandAnalysis";
-import Connections from "./pages/Connections";
-import Chat from "./pages/Chat";
 import SearchTest from "./pages/SearchTest";
 import NotFound from "./pages/NotFound";
 
@@ -31,8 +29,6 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/brand-builder" element={<BrandBuilder />} />
             <Route path="/discovery" element={<Discovery />} />
-            <Route path="/connections" element={<Connections />} />
-            <Route path="/chat/:connectionId" element={<Chat />} />
             <Route path="/brand-profile/:id" element={<BrandProfile />} />
             <Route path="/brand-analysis/:id" element={<BrandAnalysis />} />
             <Route path="/search-test" element={<SearchTest />} />

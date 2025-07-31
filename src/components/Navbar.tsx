@@ -33,16 +33,7 @@ const Navbar = () => {
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center space-x-8">
-            {user ? (
-              <>
-                <Link 
-                  to="/connections" 
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Connections
-                </Link>
-              </>
-            ) : (
+            {!user && (
               <>
                 <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
                   Features
