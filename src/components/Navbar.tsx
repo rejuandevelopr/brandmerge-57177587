@@ -58,8 +58,8 @@ const Navbar = () => {
                 <span className="text-muted-foreground hidden md:block">
                   Welcome, {user.email?.split('@')[0]}
                 </span>
-                <Button variant="ghost" onClick={() => navigate('/dashboard')}>
-                  Dashboard
+                <Button variant="ghost" onClick={() => navigate('/')}>
+                  Home
                 </Button>
                 <Button variant="ghost" onClick={handleSignOut}>
                   Sign Out
