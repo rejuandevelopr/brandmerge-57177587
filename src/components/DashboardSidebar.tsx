@@ -24,13 +24,11 @@ import {
 import { Button } from '@/components/ui/button';
 
 const navigationItems = [
-  { title: 'Overview', url: '/dashboard', icon: BarChart3 },
-  { title: 'Brand Profiles', url: '/dashboard/brands', icon: Building2 },
+  { title: 'Dashboard', url: '/dashboard', icon: BarChart3 },
 ];
 
 const quickActions = [
   { title: 'Create Brand Profile', url: '/brand-builder', icon: Plus },
-  { title: 'Settings', url: '/settings', icon: Settings },
 ];
 
 export function DashboardSidebar() {
