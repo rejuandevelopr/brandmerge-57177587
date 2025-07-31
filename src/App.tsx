@@ -13,6 +13,7 @@ import BrandProfile from "./pages/BrandProfile";
 import BrandAnalysis from "./pages/BrandAnalysis";
 import Connections from "./pages/Connections";
 import Chat from "./pages/Chat";
+import SearchTest from "./pages/SearchTest";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/chat/:connectionId" element={<Chat />} />
             <Route path="/brand-profile/:id" element={<BrandProfile />} />
             <Route path="/brand-analysis/:id" element={<BrandAnalysis />} />
+            <Route path="/search-test" element={<SearchTest />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
