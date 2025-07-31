@@ -158,35 +158,40 @@ serve(async (req) => {
       }
     };
 
-    // For demo purposes, we'll simulate the Qloo API response
-    // In a real implementation, you would call the actual Qloo API
-    console.log('Simulating Qloo API call with data:', qlooRequestData);
+    // Get real brands from Google search analysis
+    console.log('Fetching real brands from brand match analysis');
+    const { data: matchAnalysis, error: matchError } = await supabase
+      .from('brand_match_analyses')
+      .select('matched_brands, analysis_status')
+      .eq('brand_profile_id', brandProfileId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
 
+    let realBrands = [];
+    if (matchAnalysis && matchAnalysis.matched_brands && Array.isArray(matchAnalysis.matched_brands)) {
+      realBrands = matchAnalysis.matched_brands;
+      console.log(`Found ${realBrands.length} real brands from Google search analysis`);
+    } else {
+      console.log('No Google search results found - proceeding with empty analysis');
+    }
+
+    // Simulate Qloo API call using real brands
+    console.log('Analyzing cultural alignment for real brands:', realBrands.map(b => b.name));
+    
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
-    // Generate mock response based on brand data
+    // Generate Qloo response based on real brands
     const mockQlooResponse: QlooApiResponse = {
-      similarBrands: [
-        { name: "Nike", overlapScore: 85, category: "Athletic Lifestyle" },
-        { name: "Patagonia", overlapScore: 72, category: "Outdoor Adventure" },
-        { name: "Apple", overlapScore: 68, category: "Innovation Tech" },
-        { name: "Spotify", overlapScore: 65, category: "Music Culture" },
-        { name: "Tesla", overlapScore: 62, category: "Future Mobility" }
-      ].filter(brand => {
-        // Filter based on cultural markers and interests
-        const markers = brandProfile.cultural_taste_markers || [];
-        const interests = brandProfile.niche_interests || [];
-        
-        // Simple matching logic for demo
-        if (markers.includes('technology') && brand.category.includes('Tech')) return true;
-        if (markers.includes('sustainability') && brand.name === 'Patagonia') return true;
-        if (interests.includes('fitness') && brand.name === 'Nike') return true;
-        if (markers.includes('music') && brand.name === 'Spotify') return true;
-        
-        return Math.random() > 0.3; // Random selection for demo
-      }).slice(0, 5),
-      overallScore: Math.floor(Math.random() * 20) + 70 // Random score 70-90
+      similarBrands: realBrands.slice(0, 5).map(brand => ({
+        name: brand.name,
+        overlapScore: Math.round((brand.overlapScore * 100) + Math.random() * 10 - 5), // Convert to percentage with slight variation
+        category: brand.industry || 'Business'
+      })),
+      overallScore: realBrands.length > 0 
+        ? Math.round(realBrands.reduce((sum, brand) => sum + brand.overlapScore, 0) / realBrands.length * 100)
+        : 0
     };
 
     console.log('Processing Qloo response:', mockQlooResponse);

@@ -203,41 +203,40 @@ async function extractBrandsFromResults(
   if (searchResults.length === 0) return [];
   
   const prompt = `
-Analyze these search results and extract potential brand partnership opportunities for "${brandProfile.brand_name}" (${brandProfile.industry}, ${brandProfile.country || brandProfile.city_region}).
+You are an expert business analyst. Extract potential brand partnership opportunities from these search results.
 
-Target brand details:
-- Industry: ${brandProfile.industry}
-- Mission: ${brandProfile.mission_statement}
-- Location: ${brandProfile.country || brandProfile.city_region}
-- Cultural markers: ${brandProfile.cultural_taste_markers?.join(', ') || 'N/A'}
+Target Brand: "${brandProfile.brand_name}"
+Industry: ${brandProfile.industry}
+Location: ${brandProfile.country || brandProfile.city_region}
 
 Search Results:
-${searchResults.map(result => `Title: ${result.title}\nURL: ${result.link}\nDescription: ${result.snippet}`).join('\n\n')}
+${searchResults.map((result, index) => `${index + 1}. ${result.title}\n   ${result.snippet}\n   URL: ${result.link}`).join('\n\n')}
 
-Extract up to 8 potential brand partners from these results. For each brand, provide:
-1. Company/brand name
-2. Industry sector
-3. Location (city, country)
-4. Website URL (if available)
-5. Brief description (1-2 sentences)
-6. Match type (industry_similar, location_based, cultural_alignment, or partnership_opportunity)
-7. Overlap score (0.0-1.0 based on compatibility)
+TASK: Find REAL companies/brands mentioned in these search results that could partner with ${brandProfile.brand_name}.
 
-Return ONLY a valid JSON array with this structure:
+RULES:
+- Only extract actual company/brand names mentioned in the search results
+- Look for companies in partnerships, collaborations, funding announcements, or business listings
+- Ignore news sites, blogs, directories, or generic results
+- Each brand must be a real business entity
+
+REQUIRED OUTPUT: Valid JSON array with exactly this structure:
 [
   {
-    "name": "Brand Name",
-    "industry": "Industry",
+    "name": "Exact Company Name",
+    "industry": "Specific Industry",
     "location": "City, Country",
-    "website": "https://...",
-    "description": "Brief description",
+    "website": "URL from results or inferred",
+    "description": "What they do (from search results)",
     "matchType": "industry_similar",
     "overlapScore": 0.75
   }
 ]
 
-Focus on real companies that could realistically partner with ${brandProfile.brand_name}. Exclude generic results, news articles, or non-business entities.
-`;
+Match Types: "industry_similar", "location_based", "cultural_alignment", "partnership_opportunity"
+Overlap Score: 0.3-1.0 based on relevance to ${brandProfile.brand_name}
+
+Return maximum 6 brands. If no real brands found, return empty array [].`;
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -249,10 +248,11 @@ Focus on real companies that could realistically partner with ${brandProfile.bra
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'You are an expert business analyst specializing in identifying strategic partnerships and brand collaborations.' },
+          { role: 'system', content: 'You extract company information from search results. Always return valid JSON arrays only.' },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.3,
+        temperature: 0.1,
+        max_tokens: 2000,
       }),
     });
 
@@ -261,10 +261,17 @@ Focus on real companies that could realistically partner with ${brandProfile.bra
     
     if (content) {
       try {
-        const extractedBrands = JSON.parse(content);
+        // Clean the response to ensure it's valid JSON
+        const cleanContent = content.trim();
+        const jsonMatch = cleanContent.match(/\[[\s\S]*\]/);
+        const jsonString = jsonMatch ? jsonMatch[0] : cleanContent;
+        
+        const extractedBrands = JSON.parse(jsonString);
+        console.log(`Extracted ${extractedBrands.length} brands from search results`);
         return Array.isArray(extractedBrands) ? extractedBrands : [];
       } catch (parseError) {
         console.error('Failed to parse OpenAI response as JSON:', parseError);
+        console.error('Response content:', content);
         return [];
       }
     }
