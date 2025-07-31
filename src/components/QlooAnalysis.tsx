@@ -280,9 +280,9 @@ export default function QlooAnalysis({ brandProfileId, brandName, onAnalysisUpda
                   {brand.growthForecast && (
                     <div className="border-t pt-3">
                       <div className="flex items-start gap-2">
-                        <Target className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                        <Target className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                         <div>
-                          <div className="text-sm font-medium text-green-700 mb-1">Growth Opportunity Forecast</div>
+                          <div className="text-sm font-medium text-primary mb-1">Growth Opportunity Forecast</div>
                           <p className="text-sm text-muted-foreground leading-relaxed">
                             {brand.growthForecast}
                           </p>
